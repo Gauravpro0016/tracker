@@ -112,7 +112,7 @@ export const taskSchema = z.object({
 });
 
 export const plannerItemSchema = z.object({
-  title: z.string().min(1, "Title is required").max(100),
+  title: z.string().min(1, "Title is required").max(200),
   subjectId: z.string().nullable().optional(),
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be YYYY-MM-DD"),
   startTime: z.string().regex(/^\d{2}:\d{2}$/, "Time must be HH:MM"),
@@ -120,13 +120,13 @@ export const plannerItemSchema = z.object({
   priority: z.enum(["low", "medium", "high"]).default("medium"),
   status: z.enum(["pending", "done"]).default("pending"),
   recurring: z.enum(["none", "daily", "weekly"]).default("none"),
-  notes: z.string().max(500).optional(),
+  notes: z.string().max(1000).optional(),
 });
 
 export const habitSchema = z.object({
-  name: z.string().min(1, "Habit name is required").max(50),
-  category: z.string().max(50).default("General"),
-  targetDaysPerWeek: z.number().min(1).max(7).default(7),
+  name: z.string().min(1, "Habit name is required").max(200, "Habit name must be 200 characters or less"),
+  category: z.string().max(100).optional().or(z.literal("")).default("General"),
+  targetDaysPerWeek: z.coerce.number().min(1).max(7).default(7),
   color: z.string().default("#ffffff"),
 });
 
@@ -137,18 +137,18 @@ export const habitLogSchema = z.object({
 });
 
 export const goalSchema = z.object({
-  title: z.string().min(1, "Goal title is required").max(100),
+  title: z.string().min(1, "Goal title is required").max(200),
   subjectId: z.string().nullable().optional(),
   type: z.enum(["daily", "weekly", "monthly"]).default("daily"),
-  targetHours: z.number().min(0.1).max(100),
+  targetHours: z.number().min(0.1).max(1000),
   active: z.boolean().default(true),
 });
 
 export const examSchema = z.object({
-  title: z.string().min(1, "Exam title is required").max(100),
+  title: z.string().min(1, "Exam title is required").max(200),
   subjectId: z.string().nullable().optional(),
   examDate: z.string(),
   targetScore: z.string().optional(),
-  notes: z.string().max(500).optional(),
+  notes: z.string().max(1000).optional(),
 });
 

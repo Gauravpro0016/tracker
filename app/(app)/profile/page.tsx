@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
@@ -19,17 +20,22 @@ import {
   GraduationCap,
   Loader2,
   Upload,
+  Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatTime } from "@/lib/utils";
 import { getStorageItem } from "@/lib/storage";
 import { calculateStreaks } from "@/lib/streak";
+import { calculateAchievementsProgress } from "@/lib/achievements";
+import AchievementsGrid from "@/components/achievements/AchievementsGrid";
 
-export default function ProfilePage() {
+function ProfileContent() {
   const { data: session, update: updateSession } = useSession();
   const queryClient = useQueryClient();
+  const searchParams = useSearchParams();
 
-  const [activeTab, setActiveTab] = useState<"profile" | "security">("profile");
+  const initialTab = searchParams.get("tab") === "achievements" ? "achievements" : "profile";
+  const [activeTab, setActiveTab] = useState<"profile" | "achievements" | "security">(initialTab);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [localAvatarPreview, setLocalAvatarPreview] = useState<string | null>(null);
 
@@ -47,6 +53,18 @@ export default function ProfilePage() {
   // Delete account confirmation
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteInput, setDeleteInput] = useState("");
+
+  // Listen to searchParams changes
+  useEffect(() => {
+    const tabParam = searchParams.get("tab");
+    if (tabParam === "achievements") {
+      setActiveTab("achievements");
+    } else if (tabParam === "security") {
+      setActiveTab("security");
+    } else if (tabParam === "profile") {
+      setActiveTab("profile");
+    }
+  }, [searchParams]);
 
   // Query User Profile
   const { data: user, isLoading } = useQuery({
@@ -76,7 +94,10 @@ export default function ProfilePage() {
         const totalSecs = local.reduce((sum: number, s: any) => sum + (s.durationSeconds || 0), 0);
         return {
           streak: streakInfo,
-          stats: { totalHours: Number((totalSecs / 3600).toFixed(1)) },
+          stats: {
+            totalHours: Number((totalSecs / 3600).toFixed(1)),
+            totalSessions: local.length,
+          },
         };
       }
       const res = await fetch("/api/analytics?range=year");
@@ -281,38 +302,19 @@ export default function ProfilePage() {
     changePasswordMutation.mutate();
   };
 
-  if (!session?.user) {
-    return (
-      <div className="max-w-xl mx-auto py-16 text-center space-y-4 text-white">
-        <div className="w-16 h-16 rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center mx-auto text-neutral-400">
-          <UserIcon className="w-8 h-8" />
-        </div>
-        <h2 className="text-xl font-bold">You are in Guest Mode</h2>
-        <p className="text-xs text-neutral-400 max-w-sm mx-auto">
-          Sign up or log in to customize your profile, set target exams, and track cloud-synced study stats!
-        </p>
-        <div className="flex justify-center gap-3 pt-2">
-          <Link
-            href="/login"
-            className="px-5 py-2.5 rounded-xl border border-neutral-800 bg-neutral-900 hover:bg-neutral-800 text-xs font-semibold text-white"
-          >
-            Sign In
-          </Link>
-          <Link
-            href="/register"
-            className="px-5 py-2.5 rounded-xl bg-white text-black font-bold text-xs hover:bg-neutral-200"
-          >
-            Create Account
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
   const totalHours = analytics?.stats?.totalHours || 0;
   const currentStreak = analytics?.streak?.currentStreak || 0;
-  const displayedAvatar =
-    localAvatarPreview || user?.avatar || (session.user as any)?.image;
+  const longestStreak = analytics?.streak?.longestStreak || currentStreak;
+  const totalSessions = analytics?.stats?.totalSessions || 0;
+
+  const achievementStats = {
+    totalHours,
+    currentStreak,
+    longestStreak,
+    totalSessions,
+  };
+
+  const { totalUnlocked, totalAvailable } = calculateAchievementsProgress(achievementStats);
 
   // Determine study rank badge based on total hours
   const rank =
@@ -326,6 +328,99 @@ export default function ProfilePage() {
       ? { title: "Consistent Learner", level: 2, color: "text-emerald-400" }
       : { title: "Focused Initiate", level: 1, color: "text-neutral-400" };
 
+  const displayedAvatar =
+    localAvatarPreview || user?.avatar || (session?.user as any)?.image;
+
+  // Guest Mode View
+  if (!session?.user) {
+    return (
+      <div className="space-y-8 max-w-5xl mx-auto pb-20 animate-fade-in text-white">
+        {/* Guest Banner */}
+        <div className="p-4 sm:p-5 rounded-2xl bg-neutral-950/80 border border-neutral-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 shrink-0">
+              <Sparkles className="w-5 h-5" />
+            </div>
+            <div>
+              <h4 className="text-sm font-bold text-white">
+                Guest Mode Active
+              </h4>
+              <p className="text-xs text-neutral-400">
+                Your stats and step-by-step hour badges are calculated from your local device sessions. Sign in to sync them to the cloud!
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <Link
+              href="/login"
+              className="px-4 py-2 rounded-xl bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-xs font-semibold text-white transition-colors"
+            >
+              Sign In
+            </Link>
+            <Link
+              href="/register"
+              className="px-4 py-2 rounded-xl bg-white text-black font-bold text-xs hover:bg-neutral-200 transition-colors"
+            >
+              Create Account
+            </Link>
+          </div>
+        </div>
+
+        {/* Guest Stats Header */}
+        <div className="p-4 sm:p-6 md:p-8 rounded-3xl bg-neutral-950/70 border border-neutral-800 backdrop-blur-md shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5">
+            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full border-2 border-neutral-700 bg-neutral-900 flex items-center justify-center shrink-0 overflow-hidden shadow-lg text-2xl font-black text-neutral-400">
+              <UserIcon className="w-8 h-8 text-neutral-500" />
+            </div>
+
+            <div className="text-center sm:text-left flex-1 min-w-0">
+              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2.5">
+                <h1 className="text-xl md:text-2xl font-extrabold tracking-tight text-white">
+                  Guest Scholar
+                </h1>
+                <span className="text-xs px-2.5 py-0.5 rounded-full bg-neutral-900 border border-neutral-800 text-neutral-400 font-mono">
+                  @offline
+                </span>
+              </div>
+              <p className="text-xs text-neutral-400 mt-1 max-w-md">
+                Tracking offline study milestones and deep work focus.
+              </p>
+              <div className="flex items-center justify-center sm:justify-start gap-2 mt-3">
+                <Award className={`w-4 h-4 ${rank.color}`} />
+                <span className={`text-xs font-bold ${rank.color}`}>
+                  Rank {rank.level}: {rank.title}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-around sm:justify-start gap-4 border-t md:border-t-0 md:border-l border-neutral-800 pt-4 md:pt-0 md:pl-6 w-full md:w-auto">
+            <div className="text-center px-3">
+              <span className="text-xl font-bold font-mono text-white block">
+                {totalHours}h
+              </span>
+              <span className="text-[10px] text-neutral-500 uppercase tracking-wider">
+                Total Focus
+              </span>
+            </div>
+            <div className="text-center px-3">
+              <span className="text-xl font-bold font-mono text-amber-400 block flex items-center justify-center gap-1">
+                <Flame className="w-4 h-4 fill-amber-500" />
+                {currentStreak}d
+              </span>
+              <span className="text-[10px] text-neutral-500 uppercase tracking-wider">
+                Streak
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Full Achievements View for Guest */}
+        <AchievementsGrid stats={achievementStats} />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8 max-w-5xl mx-auto pb-20 animate-fade-in text-white">
       {/* Profile Header with Avatar & Rank */}
@@ -336,12 +431,12 @@ export default function ProfilePage() {
             {displayedAvatar ? (
               <img
                 src={displayedAvatar}
-                alt={user?.name || session.user.name || "User"}
+                alt={user?.name || session.user?.name || "User"}
                 className="w-full h-full object-cover"
               />
             ) : (
               <span className="text-2xl sm:text-3xl font-black text-white">
-                {(user?.name || session.user.name || "U")[0].toUpperCase()}
+                {(user?.name || session.user?.name || "U")[0].toUpperCase()}
               </span>
             )}
 
@@ -375,10 +470,10 @@ export default function ProfilePage() {
           <div className="text-center sm:text-left flex-1 min-w-0">
             <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2.5">
               <h1 className="text-xl md:text-2xl font-extrabold tracking-tight text-white">
-                {user?.name || session.user.name}
+                {user?.name || session.user?.name}
               </h1>
               <span className="text-xs px-2.5 py-0.5 rounded-full bg-neutral-900 border border-neutral-800 text-neutral-400 font-mono">
-                @{user?.username || (session.user as any).username || "student"}
+                @{user?.username || (session.user as any)?.username || "student"}
               </span>
             </div>
             <p className="text-xs text-neutral-400 mt-1 max-w-md">
@@ -425,22 +520,33 @@ export default function ProfilePage() {
       </div>
 
       {/* Navigation Tabs */}
-      <div className="flex items-center gap-2 border-b border-neutral-800 pb-3">
+      <div className="flex items-center gap-2 border-b border-neutral-800 pb-3 overflow-x-auto scrollbar-none">
         <button
           onClick={() => setActiveTab("profile")}
-          className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
+          className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all shrink-0 ${
             activeTab === "profile"
-              ? "bg-white text-black"
+              ? "bg-white text-black shadow-md"
               : "text-neutral-400 hover:text-white"
           }`}
         >
           General Profile
         </button>
         <button
+          onClick={() => setActiveTab("achievements")}
+          className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all shrink-0 flex items-center gap-1.5 ${
+            activeTab === "achievements"
+              ? "bg-white text-black shadow-md"
+              : "text-neutral-400 hover:text-white"
+          }`}
+        >
+          <Award className="w-3.5 h-3.5" />
+          <span>Achievements ({totalUnlocked}/{totalAvailable})</span>
+        </button>
+        <button
           onClick={() => setActiveTab("security")}
-          className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
+          className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all shrink-0 ${
             activeTab === "security"
-              ? "bg-white text-black"
+              ? "bg-white text-black shadow-md"
               : "text-neutral-400 hover:text-white"
           }`}
         >
@@ -529,7 +635,12 @@ export default function ProfilePage() {
         </form>
       )}
 
-      {/* Tab 2: Security & Password */}
+      {/* Tab 2: Achievements & Badges */}
+      {activeTab === "achievements" && (
+        <AchievementsGrid stats={achievementStats} />
+      )}
+
+      {/* Tab 3: Security & Password */}
       {activeTab === "security" && (
         <div className="space-y-6 max-w-2xl">
           <form
@@ -630,3 +741,10 @@ export default function ProfilePage() {
   );
 }
 
+export default function ProfilePage() {
+  return (
+    <Suspense fallback={<div className="max-w-5xl mx-auto py-12 text-center text-neutral-500">Loading achievements...</div>}>
+      <ProfileContent />
+    </Suspense>
+  );
+}

@@ -13,6 +13,7 @@ import {
   Trophy,
   CheckSquare,
   Target,
+  Award,
   User as UserIcon,
   Palette,
   ChevronLeft,
@@ -70,6 +71,7 @@ function AppSidebar({ mobileOpen, setMobileOpen }: SidebarProps) {
     { label: "Rankings", href: "/leaderboard", icon: Trophy },
     { label: "Habits", href: "/habits", icon: CheckSquare },
     { label: "Goals", href: "/goals", icon: Target },
+    { label: "Achievements", href: "/profile?tab=achievements", icon: Award },
     { label: "Profile", href: "/profile", icon: UserIcon },
     { label: "Appearance", href: "/appearance", icon: Palette },
   ];

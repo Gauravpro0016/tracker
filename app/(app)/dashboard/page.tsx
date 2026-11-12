@@ -29,6 +29,7 @@ import {
 import { formatTime, formatDurationHuman } from "@/lib/utils";
 import { getStorageItem } from "@/lib/storage";
 import { calculateStreaks } from "@/lib/streak";
+import NextMilestoneCard from "@/components/achievements/NextMilestoneCard";
 
 const STUDY_QUOTES = [
   { quote: "Focus is a muscle. The more you practice, the easier it gets.", author: "Cal Newport" },
@@ -59,11 +60,15 @@ export default function DashboardPage() {
         const todayStr = new Date().toISOString().split("T")[0];
         const totalSeconds = localSessions.reduce((sum: number, s: any) => sum + (s.durationSeconds || 0), 0);
         const todayHours = Number(((streakInfo.todayStudiedSeconds || 0) / 3600).toFixed(1));
+        const totalHours = Number((totalSeconds / 3600).toFixed(1));
         return {
           streak: streakInfo,
           stats: {
-            totalHours: Number((totalSeconds / 3600).toFixed(1)),
-            thisWeekHours: Number((totalSeconds / 3600).toFixed(1)),
+            totalHours,
+            lifetimeHours: totalHours,
+            lifetimeSessions: localSessions.length,
+            thisWeekHours: totalHours,
+            totalSessions: localSessions.length,
           },
           dailyData: [
             { date: "Mon", hours: 0 },
@@ -127,8 +132,18 @@ export default function DashboardPage() {
   })();
 
   const currentStreak = analytics?.streak?.currentStreak || 0;
+  const longestStreak = analytics?.streak?.longestStreak || currentStreak;
   const todaySecs = analytics?.streak?.todayStudiedSeconds || 0;
   const thisWeekHours = analytics?.stats?.thisWeekHours || 0;
+  const lifetimeHours = analytics?.stats?.lifetimeHours ?? analytics?.stats?.totalHours ?? 0;
+  const lifetimeSessions = analytics?.stats?.lifetimeSessions ?? analytics?.stats?.totalSessions ?? 0;
+
+  const milestoneStats = {
+    totalHours: lifetimeHours,
+    currentStreak,
+    longestStreak,
+    totalSessions: lifetimeSessions,
+  };
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto pb-12 animate-fade-in">
@@ -219,6 +234,9 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
+
+      {/* Next Hour Milestone Card */}
+      <NextMilestoneCard stats={milestoneStats} />
 
       {/* Middle Grid: Mini Weekly Chart + Today's Tasks */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

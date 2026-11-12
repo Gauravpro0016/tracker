@@ -75,7 +75,10 @@ export default function HabitsPage() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
         });
-        if (!res.ok) throw new Error("Failed to create habit");
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.error || "Failed to create habit");
+        }
         return res.json();
       } else {
         const currentData = getStorageItem<{ habits: any[]; logs: any[] }>("focusdesk-guest-habits", { habits: [], logs: [] });
@@ -91,17 +94,24 @@ export default function HabitsPage() {
       setShowAddModal(false);
       setHabitName("");
     },
+    onError: (err: any) => {
+      toast.error(err.message || "Failed to create habit");
+    },
   });
 
   // Toggle Day Completion
   const toggleHabitMutation = useMutation({
     mutationFn: async ({ habitId, date, completed }: { habitId: string; date: string; completed: boolean }) => {
       if (session?.user) {
-        await fetch("/api/habits", {
+        const res = await fetch("/api/habits", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ type: "log", habitId, date, completed: !completed }),
         });
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.error || "Failed to update habit log");
+        }
       } else {
         const currentData = getStorageItem<{ habits: any[]; logs: any[] }>("focusdesk-guest-habits", { habits: [], logs: [] });
         const existingIdx = currentData.logs.findIndex((l: any) => l.habitId === habitId && l.date === date);
@@ -116,13 +126,20 @@ export default function HabitsPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["habits"] });
     },
+    onError: (err: any) => {
+      toast.error(err.message || "Failed to log habit");
+    },
   });
 
   // Delete Habit
   const deleteHabitMutation = useMutation({
     mutationFn: async (id: string) => {
       if (session?.user) {
-        await fetch(`/api/habits/${id}`, { method: "DELETE" });
+        const res = await fetch(`/api/habits/${id}`, { method: "DELETE" });
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.error || "Failed to delete habit");
+        }
       } else {
         const currentData = getStorageItem<{ habits: any[]; logs: any[] }>("focusdesk-guest-habits", { habits: [], logs: [] });
         currentData.habits = currentData.habits.filter((h: any) => h._id !== id);
@@ -133,6 +150,9 @@ export default function HabitsPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["habits"] });
       toast.success("Habit removed");
+    },
+    onError: (err: any) => {
+      toast.error(err.message || "Failed to delete habit");
     },
   });
 
@@ -148,9 +168,9 @@ export default function HabitsPage() {
     if (!habitName.trim()) return;
     createHabitMutation.mutate({
       name: habitName.trim(),
-      category,
-      targetDaysPerWeek: Number(targetDays),
-      color: habitColor,
+      category: category.trim() || "Study",
+      targetDaysPerWeek: Number(targetDays) || 7,
+      color: habitColor || "#ffffff",
     });
   };
 
@@ -290,6 +310,7 @@ export default function HabitsPage() {
                 <input
                   type="text"
                   required
+                  maxLength={200}
                   value={habitName}
                   onChange={(e) => setHabitName(e.target.value)}
                   placeholder="e.g. Solve 3 Practice Problems"

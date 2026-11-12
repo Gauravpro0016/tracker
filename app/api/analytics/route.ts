@@ -241,6 +241,14 @@ export async function GET(req: NextRequest) {
         ? Number((totalHoursInRange / dailyData.length).toFixed(1))
         : 0;
 
+    // Calculate lifetime stats from all sessions
+    const lifetimeSeconds = allUserSessions.reduce(
+      (sum, s) => sum + (s.durationSeconds || 0),
+      0
+    );
+    const lifetimeHours = Number((lifetimeSeconds / 3600).toFixed(1));
+    const lifetimeSessions = allUserSessions.length;
+
     return NextResponse.json({
       range,
       userTimezone,
@@ -248,6 +256,8 @@ export async function GET(req: NextRequest) {
       stats: {
         totalHours: totalHoursInRange,
         totalSessions: totalSessionsInRange,
+        lifetimeHours,
+        lifetimeSessions,
         averageHoursPerDay: avgHoursPerDay,
         bestDay: bestDayObj,
         longestSessionSeconds,

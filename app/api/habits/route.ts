@@ -53,7 +53,8 @@ export async function POST(req: NextRequest) {
     if (body.type === "log") {
       const parsed = habitLogSchema.safeParse(body);
       if (!parsed.success) {
-        return NextResponse.json({ error: "Validation error" }, { status: 400 });
+        const errorMsg = parsed.error.errors[0]?.message || "Validation error";
+        return NextResponse.json({ error: errorMsg, details: parsed.error.format() }, { status: 400 });
       }
 
       const log = await HabitLog.findOneAndUpdate(
@@ -72,7 +73,8 @@ export async function POST(req: NextRequest) {
     } else {
       const parsed = habitSchema.safeParse(body);
       if (!parsed.success) {
-        return NextResponse.json({ error: "Validation error" }, { status: 400 });
+        const errorMsg = parsed.error.errors[0]?.message || "Validation error";
+        return NextResponse.json({ error: errorMsg, details: parsed.error.format() }, { status: 400 });
       }
 
       const habit = await Habit.create({
