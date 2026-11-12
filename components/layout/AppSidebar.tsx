@@ -16,6 +16,7 @@ import {
   Award,
   User as UserIcon,
   Palette,
+  LifeBuoy,
   ChevronLeft,
   ChevronRight,
   Flame,
@@ -74,6 +75,7 @@ function AppSidebar({ mobileOpen, setMobileOpen }: SidebarProps) {
     { label: "Achievements", href: "/profile?tab=achievements", icon: Award },
     { label: "Profile", href: "/profile", icon: UserIcon },
     { label: "Appearance", href: "/appearance", icon: Palette },
+    { label: "Support", href: "/contact", icon: LifeBuoy },
   ];
 
   return (

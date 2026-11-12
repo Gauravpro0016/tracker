@@ -152,3 +152,10 @@ export const examSchema = z.object({
   notes: z.string().max(1000).optional(),
 });
 
+export const contactMessageSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters").max(100, "Name cannot exceed 100 characters"),
+  email: z.string().email("Please provide a valid email address"),
+  subject: z.string().max(150, "Subject cannot exceed 150 characters").optional().default("General Support"),
+  message: z.string().min(10, "Message must be at least 10 characters").max(3000, "Message cannot exceed 3000 characters"),
+});
+

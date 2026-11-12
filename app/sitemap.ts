@@ -3,7 +3,7 @@ import { MetadataRoute } from "next";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = process.env.NEXTAUTH_URL || "https://focusdesk.app";
-  const routes = ["", "/dashboard", "/analytics", "/leaderboard", "/habits", "/goals", "/planner", "/appearance", "/login", "/register"];
+  const routes = ["", "/dashboard", "/analytics", "/leaderboard", "/habits", "/goals", "/planner", "/appearance", "/login", "/register", "/contact"];
 
   return routes.map((route) => ({
     url: `${baseUrl}${route}`,

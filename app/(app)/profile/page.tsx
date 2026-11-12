@@ -21,6 +21,8 @@ import {
   Loader2,
   Upload,
   Sparkles,
+  Share2,
+  ExternalLink,
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatTime } from "@/lib/utils";
@@ -28,6 +30,7 @@ import { getStorageItem } from "@/lib/storage";
 import { calculateStreaks } from "@/lib/streak";
 import { calculateAchievementsProgress } from "@/lib/achievements";
 import AchievementsGrid from "@/components/achievements/AchievementsGrid";
+import ShareProfileModal from "@/components/profile/ShareProfileModal";
 
 function ProfileContent() {
   const { data: session, update: updateSession } = useSession();
@@ -38,6 +41,7 @@ function ProfileContent() {
   const [activeTab, setActiveTab] = useState<"profile" | "achievements" | "security">(initialTab);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [localAvatarPreview, setLocalAvatarPreview] = useState<string | null>(null);
+  const [shareModalOpen, setShareModalOpen] = useState(false);
 
   // Form states
   const [name, setName] = useState("");
@@ -493,6 +497,24 @@ function ProfileContent() {
                 <Upload className="w-3 h-3 text-neutral-400" />
                 <span>Upload New Picture</span>
               </label>
+              <button
+                type="button"
+                onClick={() => setShareModalOpen(true)}
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg border border-neutral-800 bg-neutral-900 hover:bg-neutral-800 hover:border-neutral-700 text-[11px] font-semibold text-white transition-colors shadow-sm"
+              >
+                <Share2 className="w-3 h-3 text-amber-400" />
+                <span>Share Profile</span>
+              </button>
+              <a
+                href={`/u/${user?.username || (session.user as any)?.username || ""}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg border border-neutral-800 bg-neutral-900 hover:bg-neutral-800 hover:border-neutral-700 text-[11px] font-medium text-neutral-400 hover:text-white transition-colors"
+                title="View your public scholar profile"
+              >
+                <ExternalLink className="w-3 h-3 text-neutral-400" />
+                <span>Public View</span>
+              </a>
             </div>
           </div>
         </div>
@@ -737,6 +759,22 @@ function ProfileContent() {
           </div>
         </div>
       )}
+
+      {/* Share Profile Modal */}
+      <ShareProfileModal
+        isOpen={shareModalOpen}
+        onClose={() => setShareModalOpen(false)}
+        user={{
+          name: user?.name || session?.user?.name || "Scholar",
+          username: user?.username || (session?.user as any)?.username || "scholar",
+          avatar: displayedAvatar,
+        }}
+        stats={{
+          totalHours,
+          currentStreak,
+          rankTitle: rank.title,
+        }}
+      />
     </div>
   );
 }
