@@ -52,12 +52,12 @@ export default function AppHeader({ setMobileOpen, toggleFullscreen }: HeaderPro
   }
 
   return (
-    <header className="h-16 border-b border-neutral-800 bg-black/40 backdrop-blur-md px-4 lg:px-6 flex items-center justify-between sticky top-0 z-30">
+    <header className="h-16 border-b border-neutral-800 bg-black/40 backdrop-blur-md px-3 sm:px-4 lg:px-6 flex items-center justify-between sticky top-0 z-30">
       {/* Left: Mobile hamburger & Active Timer Status */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 sm:gap-3 min-w-0">
         <button
           onClick={() => setMobileOpen(true)}
-          className="lg:hidden p-2 rounded-lg text-neutral-400 hover:text-white hover:bg-neutral-900 border border-neutral-800"
+          className="lg:hidden p-2 rounded-lg text-neutral-400 hover:text-white hover:bg-neutral-900 border border-neutral-800 shrink-0"
           title="Open Menu"
         >
           <Menu className="w-5 h-5" />
@@ -65,15 +65,15 @@ export default function AppHeader({ setMobileOpen, toggleFullscreen }: HeaderPro
 
         {/* Running status pill */}
         {isRunning && (
-          <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-neutral-900/80 border border-neutral-800 text-xs">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-            <span className="text-neutral-400 font-medium capitalize hidden sm:inline">{mode}:</span>
-            <span className="font-mono font-semibold text-white">
+          <div className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1 rounded-full bg-neutral-900/80 border border-neutral-800 text-xs shrink-0 max-w-[160px] sm:max-w-none">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping shrink-0" />
+            <span className="text-neutral-400 font-medium capitalize hidden md:inline">{mode}:</span>
+            <span className="font-mono font-semibold text-white truncate">
               {formatTime(displaySeconds, true)}
             </span>
             <button
               onClick={isRunning ? pause : resume}
-              className="p-1 hover:text-white text-neutral-400 ml-1"
+              className="p-1 hover:text-white text-neutral-400 ml-0.5 sm:ml-1 shrink-0"
               title={isRunning ? "Pause" : "Resume"}
             >
               {isRunning ? <Pause className="w-3 h-3" /> : <Play className="w-3 h-3" />}
@@ -83,33 +83,33 @@ export default function AppHeader({ setMobileOpen, toggleFullscreen }: HeaderPro
       </div>
 
       {/* Right controls */}
-      <div className="flex items-center gap-2.5">
+      <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
         {/* Ambient sound widget */}
         <AmbientAudioControl />
 
         {/* Streak icon & count */}
         <Link
           href="/analytics"
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-neutral-800 bg-neutral-950/60 hover:border-neutral-700 text-neutral-300 text-xs font-semibold transition-all group shadow-sm"
+          className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl border border-neutral-800 bg-neutral-950/60 hover:border-neutral-700 text-neutral-300 text-xs font-semibold transition-all group shadow-sm shrink-0"
           title={`Current Streak: ${currentStreak} days`}
         >
           <Flame
-            className={`w-4 h-4 transition-transform group-hover:scale-110 ${
+            className={`w-3.5 h-3.5 sm:w-4 sm:h-4 transition-transform group-hover:scale-110 ${
               currentStreak > 0
                 ? "text-amber-500 fill-amber-500 animate-pulse"
                 : "text-neutral-600"
             }`}
           />
-          <span className="font-mono font-bold text-white">{currentStreak}d</span>
+          <span className="font-mono font-bold text-white text-xs">{currentStreak}d</span>
         </Link>
 
         {/* Fullscreen button */}
         <button
           onClick={toggleFullscreen}
-          className="p-2 rounded-xl border border-neutral-800 bg-neutral-950/60 text-neutral-400 hover:text-white hover:border-neutral-700 transition-colors"
+          className="p-2 rounded-xl border border-neutral-800 bg-neutral-950/60 text-neutral-400 hover:text-white hover:border-neutral-700 transition-colors shrink-0"
           title="Fullscreen Mode (F)"
         >
-          <Maximize className="w-4 h-4" />
+          <Maximize className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
         </button>
       </div>
     </header>

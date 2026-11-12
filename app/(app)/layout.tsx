@@ -7,6 +7,7 @@ import AppSidebar from "@/components/layout/AppSidebar";
 import AppHeader from "@/components/layout/AppHeader";
 import WallpaperBackground from "@/components/layout/WallpaperBackground";
 import { useTimerStore } from "@/store/timerStore";
+import { useThemeStore } from "@/store/themeStore";
 import { saveStudySession, syncGuestSessionsToServer } from "@/lib/save-session";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
@@ -23,7 +24,24 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     setOnSessionSave,
     setPomodoroConfig,
     setSoundConfig,
+    resetUserContext,
+    sidebarCollapsed,
   } = useTimerStore();
+
+  const previousUserRef = React.useRef<string | null>(null);
+  const hasHydratedUserRef = React.useRef<string | null>(null);
+
+  // Isolate user data when switching accounts or logging out
+  useEffect(() => {
+    const currentUserId = (session?.user as any)?.id || session?.user?.email || null;
+    if (previousUserRef.current && previousUserRef.current !== currentUserId) {
+      resetUserContext();
+      useThemeStore.getState().resetTheme();
+      hasHydratedUserRef.current = null;
+      queryClient.clear();
+    }
+    previousUserRef.current = currentUserId;
+  }, [session?.user, resetUserContext, queryClient]);
 
   // Automatically save study session when timer is reset or completed
   useEffect(() => {
@@ -42,7 +60,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     }
   }, [session?.user, queryClient]);
 
-  // Sync saved user Pomodoro & Sound settings from MongoDB when logged in
+  // Sync saved user Pomodoro, Sound, Theme & Wallpaper settings from MongoDB when logged in
   const { data: userProfile } = useQuery({
     queryKey: ["userProfile", session?.user?.email],
     queryFn: async () => {
@@ -55,6 +73,17 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   });
 
   useEffect(() => {
+    if (!userProfile) return;
+    const userIdentifier = session?.user?.email || (session?.user as any)?.id || "";
+
+    // Hydrate wallpaper and theme from user account in MongoDB
+    if (userIdentifier && hasHydratedUserRef.current !== userIdentifier) {
+      if (userProfile.wallpaper || userProfile.theme) {
+        useThemeStore.getState().hydrateFromUser(userProfile.theme, userProfile.wallpaper);
+      }
+      hasHydratedUserRef.current = userIdentifier;
+    }
+
     if (userProfile?.settings) {
       if (userProfile.settings.pomodoro) {
         setPomodoroConfig(userProfile.settings.pomodoro);
@@ -63,7 +92,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         setSoundConfig(userProfile.settings.sound);
       }
     }
-  }, [userProfile, setPomodoroConfig, setSoundConfig]);
+  }, [userProfile, session?.user, setPomodoroConfig, setSoundConfig]);
 
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
@@ -143,10 +172,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           <AppSidebar mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
         )}
 
-        {/* Content wrapper (margins adapt to sidebar width) */}
+        {/* Content wrapper (margins adapt dynamically to sidebar collapsed state) */}
         <div
           className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ${
-            isFullscreen ? "pl-0" : "lg:pl-64"
+            isFullscreen ? "pl-0" : sidebarCollapsed ? "lg:pl-20" : "lg:pl-64"
           }`}
         >
           {!isFullscreen && (
@@ -159,7 +188,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             className={
               isFullscreen
                 ? "flex-1 w-full h-full p-0 flex flex-col"
-                : "flex-1 p-4 md:p-6 lg:p-8 max-w-7xl w-full mx-auto"
+                : "flex-1 p-3 sm:p-4 md:p-6 lg:p-8 max-w-7xl w-full mx-auto"
             }
           >
             {children}

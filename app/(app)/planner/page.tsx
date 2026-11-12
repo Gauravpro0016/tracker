@@ -220,11 +220,11 @@ export default function PlannerPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-extrabold tracking-tight">Study Planner</h1>
+          <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight">Study Planner</h1>
           <p className="text-xs text-neutral-400">Schedule your deep work blocks and track exam deadlines</p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
           {/* View toggle */}
           <div className="flex items-center p-1 bg-neutral-900 border border-neutral-800 rounded-xl">
             <button
@@ -249,14 +249,14 @@ export default function PlannerPage() {
 
           <button
             onClick={() => setShowAddExam(true)}
-            className="px-3 py-2 rounded-xl border border-neutral-800 bg-neutral-900 hover:bg-neutral-800 text-xs font-medium text-neutral-300 hover:text-white transition-colors"
+            className="px-3 py-2 rounded-xl border border-neutral-800 bg-neutral-900 hover:bg-neutral-800 text-xs font-medium text-neutral-300 hover:text-white transition-colors shrink-0"
           >
             + Exam
           </button>
 
           <button
             onClick={() => setShowAddPlan(true)}
-            className="px-4 py-2 rounded-xl bg-white hover:bg-neutral-200 text-black text-xs font-bold transition-all shadow-md flex items-center gap-1.5"
+            className="px-3.5 sm:px-4 py-2 rounded-xl bg-white hover:bg-neutral-200 text-black text-xs font-bold transition-all shadow-md flex items-center gap-1.5 shrink-0"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>Plan Block</span>
@@ -320,7 +320,7 @@ export default function PlannerPage() {
 
       {/* Main Study Plan View */}
       {viewMode === "list" ? (
-        <div className="p-6 rounded-3xl bg-neutral-950/70 border border-neutral-800 backdrop-blur-md shadow-xl">
+        <div className="p-4 sm:p-6 rounded-3xl bg-neutral-950/70 border border-neutral-800 backdrop-blur-md shadow-xl">
           <div className="flex items-center justify-between pb-3 mb-4 border-b border-neutral-800">
             <h2 className="text-sm font-bold text-white">Scheduled Study Blocks</h2>
             <span className="text-xs text-neutral-500 font-mono">{items.length} items</span>
@@ -337,9 +337,9 @@ export default function PlannerPage() {
                 return (
                   <div
                     key={item._id}
-                    className="p-3.5 rounded-2xl bg-neutral-900/40 hover:bg-neutral-900/80 border border-neutral-800/80 transition-all flex items-center justify-between gap-4"
+                    className="p-3 sm:p-3.5 rounded-2xl bg-neutral-900/40 hover:bg-neutral-900/80 border border-neutral-800/80 transition-all flex items-center justify-between gap-3"
                   >
-                    <div className="flex items-center gap-3 min-w-0">
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
                       <button
                         onClick={() =>
                           toggleStatusMutation.mutate({
@@ -356,8 +356,8 @@ export default function PlannerPage() {
                         {isDone && <CheckCircle2 className="w-4 h-4" />}
                       </button>
 
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2 flex-wrap">
                           <span
                             className={`font-semibold text-xs sm:text-sm truncate ${
                               isDone ? "line-through text-neutral-500" : "text-white"
@@ -366,7 +366,7 @@ export default function PlannerPage() {
                             {item.title}
                           </span>
                           <span
-                            className={`text-[9px] px-2 py-0.5 rounded-md uppercase font-bold tracking-wider ${
+                            className={`text-[9px] px-2 py-0.5 rounded-md uppercase font-bold tracking-wider shrink-0 ${
                               item.priority === "high"
                                 ? "bg-rose-500/10 text-rose-400 border border-rose-500/20"
                                 : item.priority === "medium"
@@ -377,7 +377,7 @@ export default function PlannerPage() {
                             {item.priority}
                           </span>
                         </div>
-                        <p className="text-[11px] text-neutral-400 flex items-center gap-2 mt-0.5">
+                        <p className="text-[11px] text-neutral-400 flex items-center gap-2 mt-0.5 flex-wrap">
                           <span>{item.date}</span>
                           <span>•</span>
                           <span className="font-mono">
@@ -388,10 +388,10 @@ export default function PlannerPage() {
                               <span>•</span>
                               <span className="flex items-center gap-1">
                                 <span
-                                  className="w-2 h-2 rounded-full"
+                                  className="w-2 h-2 rounded-full shrink-0"
                                   style={{ backgroundColor: item.subjectId.color || "#fff" }}
                                 />
-                                {item.subjectId.name}
+                                <span className="truncate max-w-[120px]">{item.subjectId.name}</span>
                               </span>
                             </>
                           )}
@@ -399,13 +399,13 @@ export default function PlannerPage() {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2 shrink-0">
+                    <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
                       <button
                         onClick={() => handleStartTimerFromPlan(item)}
-                        className="px-3 py-1.5 rounded-xl bg-white text-black text-xs font-bold hover:bg-neutral-200 transition-colors flex items-center gap-1.5 shadow"
+                        className="px-2.5 sm:px-3 py-1.5 rounded-xl bg-white text-black text-xs font-bold hover:bg-neutral-200 transition-colors flex items-center gap-1.5 shadow"
                         title="Start timer with this subject and task"
                       >
-                        <Play className="w-3.5 h-3.5 fill-black" />
+                        <Play className="w-3.5 h-3.5 fill-black shrink-0" />
                         <span className="hidden sm:inline">Start Timer</span>
                       </button>
 
@@ -425,7 +425,7 @@ export default function PlannerPage() {
         </div>
       ) : (
         /* Week View Grid */
-        <div className="p-6 rounded-3xl bg-neutral-950/70 border border-neutral-800 backdrop-blur-md shadow-xl overflow-x-auto">
+        <div className="p-4 sm:p-6 rounded-3xl bg-neutral-950/70 border border-neutral-800 backdrop-blur-md shadow-xl overflow-x-auto touch-pan-x overscroll-x-contain">
           <div className="grid grid-cols-7 gap-3 min-w-[700px]">
             {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((dayName, idx) => (
               <div key={dayName} className="p-3 rounded-2xl bg-neutral-900/40 border border-neutral-800/60 min-h-[220px]">
@@ -454,8 +454,8 @@ export default function PlannerPage() {
 
       {/* Modal: Add Plan Block */}
       {showAddPlan && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
-          <div className="w-full max-w-md bg-neutral-950 border border-neutral-800 rounded-3xl p-6 shadow-2xl relative text-white">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-sm animate-fade-in overflow-y-auto">
+          <div className="w-full max-w-md bg-neutral-950 border border-neutral-800 rounded-3xl p-5 sm:p-6 shadow-2xl relative text-white max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between pb-3 border-b border-neutral-800">
               <h3 className="font-bold text-base">Schedule Study Block</h3>
               <button onClick={() => setShowAddPlan(false)} className="text-neutral-400 hover:text-white">
@@ -576,8 +576,8 @@ export default function PlannerPage() {
 
       {/* Modal: Add Exam */}
       {showAddExam && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
-          <div className="w-full max-w-md bg-neutral-950 border border-neutral-800 rounded-3xl p-6 shadow-2xl relative text-white">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-sm animate-fade-in overflow-y-auto">
+          <div className="w-full max-w-md bg-neutral-950 border border-neutral-800 rounded-3xl p-5 sm:p-6 shadow-2xl relative text-white max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between pb-3 border-b border-neutral-800">
               <h3 className="font-bold text-base">Add Exam Deadline</h3>
               <button onClick={() => setShowAddExam(false)} className="text-neutral-400 hover:text-white">

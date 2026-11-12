@@ -46,8 +46,10 @@ export async function saveStudySession(
     queryClient.invalidateQueries({ queryKey: ["sessions"] });
     queryClient.invalidateQueries({ queryKey: ["analytics"] });
     queryClient.invalidateQueries({ queryKey: ["streak"] });
+    queryClient.invalidateQueries({ queryKey: ["goals"] });
     queryClient.refetchQueries({ queryKey: ["streak"] });
     queryClient.refetchQueries({ queryKey: ["analytics"] });
+    queryClient.refetchQueries({ queryKey: ["goals"] });
   }
 
   const durationStr = formatDurationHuman(sessionData.durationSeconds);
@@ -97,8 +99,10 @@ export async function syncGuestSessionsToServer(queryClient?: any): Promise<numb
     queryClient.invalidateQueries({ queryKey: ["sessions"] });
     queryClient.invalidateQueries({ queryKey: ["analytics"] });
     queryClient.invalidateQueries({ queryKey: ["streak"] });
+    queryClient.invalidateQueries({ queryKey: ["goals"] });
     queryClient.refetchQueries({ queryKey: ["streak"] });
     queryClient.refetchQueries({ queryKey: ["analytics"] });
+    queryClient.refetchQueries({ queryKey: ["goals"] });
   }
 
   return syncedCount;

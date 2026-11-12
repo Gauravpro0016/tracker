@@ -85,7 +85,11 @@ const UserSchema = new Schema<IUser>(
         enum: ["color", "gradient", "preset", "image", "video", "youtube"],
         default: "preset",
       },
-      url: { type: String, default: "" },
+      url: {
+        type: String,
+        default:
+          "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1920&q=80",
+      },
       overlayOpacity: { type: Number, default: 0.5 },
       blurAmount: { type: Number, default: 0 },
     },

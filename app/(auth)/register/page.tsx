@@ -68,16 +68,16 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white flex flex-col justify-center items-center p-4">
+    <div className="min-h-screen bg-black text-white flex flex-col justify-center items-center p-4 py-16 sm:py-20 relative overflow-y-auto">
       {/* Back to timer link */}
       <Link
         href="/"
-        className="absolute top-8 left-8 flex items-center gap-2 text-xs text-neutral-400 hover:text-white transition-colors"
+        className="absolute top-4 left-4 sm:top-8 sm:left-8 flex items-center gap-2 text-xs text-neutral-400 hover:text-white transition-colors"
       >
         <ArrowLeft className="w-4 h-4" /> Back to Timer
       </Link>
 
-      <div className="w-full max-w-sm bg-neutral-950 border border-neutral-800 rounded-3xl p-6 sm:p-8 shadow-2xl relative">
+      <div className="w-full max-w-sm bg-neutral-950 border border-neutral-800 rounded-3xl p-5 sm:p-8 shadow-2xl relative">
         <div className="flex flex-col items-center text-center mb-6">
           <div className="w-12 h-12 rounded-2xl bg-white text-black font-extrabold flex items-center justify-center text-xl mb-3">
             FD

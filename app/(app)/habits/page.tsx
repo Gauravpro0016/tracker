@@ -159,13 +159,13 @@ export default function HabitsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-extrabold tracking-tight">Habit Tracker</h1>
+          <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight">Habit Tracker</h1>
           <p className="text-xs text-neutral-400">Build daily learning rituals and maintain study streaks</p>
         </div>
 
         <button
           onClick={() => setShowAddModal(true)}
-          className="px-4 py-2 rounded-xl bg-white hover:bg-neutral-200 text-black text-xs font-bold transition-all shadow-md flex items-center gap-1.5 self-start sm:self-center"
+          className="px-4 py-2 rounded-xl bg-white hover:bg-neutral-200 text-black text-xs font-bold transition-all shadow-md flex items-center gap-1.5 self-start sm:self-center shrink-0"
         >
           <Plus className="w-3.5 h-3.5" />
           <span>New Habit</span>
@@ -173,8 +173,8 @@ export default function HabitsPage() {
       </div>
 
       {/* Habit Grid Card */}
-      <div className="p-6 rounded-3xl bg-neutral-950/70 border border-neutral-800 backdrop-blur-md shadow-xl overflow-x-auto">
-        <div className="min-w-[650px]">
+      <div className="p-4 sm:p-6 rounded-3xl bg-neutral-950/70 border border-neutral-800 backdrop-blur-md shadow-xl overflow-x-auto touch-pan-x overscroll-x-contain">
+        <div className="min-w-[620px]">
           {/* Header row: Habit Title + Mon-Sun column headers */}
           <div className="grid grid-cols-12 gap-2 pb-3 mb-3 border-b border-neutral-800 text-xs font-bold text-neutral-400">
             <div className="col-span-5 uppercase tracking-wider text-[11px]">Habit Routine</div>
@@ -226,7 +226,7 @@ export default function HabitsPage() {
                           <p className="font-semibold text-white truncate text-xs sm:text-sm">
                             {habit.name}
                           </p>
-                          <p className="text-[10px] text-neutral-500">
+                          <p className="text-[10px] text-neutral-500 truncate">
                             {habit.category} • {completedThisWeek}/{habit.targetDaysPerWeek || 7} days
                           </p>
                         </div>
@@ -234,7 +234,7 @@ export default function HabitsPage() {
 
                       <button
                         onClick={() => deleteHabitMutation.mutate(habit._id)}
-                        className="opacity-0 group-hover:opacity-100 p-1 text-neutral-500 hover:text-rose-400"
+                        className="opacity-70 sm:opacity-0 sm:group-hover:opacity-100 p-1 text-neutral-500 hover:text-rose-400 transition-opacity shrink-0"
                         title="Delete habit"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
@@ -275,8 +275,8 @@ export default function HabitsPage() {
 
       {/* Modal: Add Habit */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
-          <div className="w-full max-w-sm bg-neutral-950 border border-neutral-800 rounded-3xl p-6 shadow-2xl relative text-white">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-sm animate-fade-in overflow-y-auto">
+          <div className="w-full max-w-sm bg-neutral-950 border border-neutral-800 rounded-3xl p-5 sm:p-6 shadow-2xl relative text-white max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between pb-3 border-b border-neutral-800">
               <h3 className="font-bold text-base">New Study Habit</h3>
               <button onClick={() => setShowAddModal(false)} className="text-neutral-400 hover:text-white">

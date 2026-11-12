@@ -46,15 +46,15 @@ function LoginForm() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-black text-white relative">
+    <div className="min-h-screen flex items-center justify-center p-4 py-16 sm:py-20 bg-black text-white relative overflow-y-auto">
       <Link
         href="/"
-        className="absolute top-6 left-6 flex items-center gap-2 text-xs font-medium text-neutral-400 hover:text-white transition-colors"
+        className="absolute top-4 left-4 sm:top-6 sm:left-6 flex items-center gap-2 text-xs font-medium text-neutral-400 hover:text-white transition-colors"
       >
         <ArrowLeft className="w-4 h-4" /> Back to Timer
       </Link>
 
-      <div className="w-full max-w-sm p-6 sm:p-8 rounded-3xl bg-neutral-950/80 border border-neutral-800 backdrop-blur-xl shadow-2xl">
+      <div className="w-full max-w-sm p-5 sm:p-8 rounded-3xl bg-neutral-950/80 border border-neutral-800 backdrop-blur-xl shadow-2xl">
         <div className="text-center mb-6">
           <div className="w-10 h-10 rounded-2xl bg-white text-black font-black flex items-center justify-center mx-auto mb-3">
             FD

@@ -42,6 +42,7 @@ interface TimerState {
   // Settings & Fullscreen
   soundConfig: SoundConfig;
   isFullscreen: boolean;
+  sidebarCollapsed: boolean;
 
   // Session save callback hook
   onSessionSave?: (sessionData: any) => void;
@@ -57,10 +58,12 @@ interface TimerState {
   setSubjectId: (id: string | null) => void;
   setTask: (task: string) => void;
   setIsFullscreen: (full: boolean) => void;
+  setSidebarCollapsed: (collapsed: boolean) => void;
   setPomodoroConfig: (config: Partial<PomodoroConfig>) => void;
   setSoundConfig: (config: Partial<SoundConfig>) => void;
   tick: () => { finished: boolean; sessionData?: any };
   manualReset: () => void;
+  resetUserContext: () => void;
 }
 
 const DEFAULT_POMODORO: PomodoroConfig = {
@@ -98,6 +101,7 @@ export const useTimerStore = create<TimerState>()(
 
       soundConfig: DEFAULT_SOUND,
       isFullscreen: false,
+      sidebarCollapsed: false,
       onSessionSave: undefined,
       setOnSessionSave: (callback?: (sessionData: any) => void) => set({ onSessionSave: callback }),
 
@@ -262,6 +266,17 @@ export const useTimerStore = create<TimerState>()(
       setSubjectId: (id: string | null) => set({ currentSubjectId: id }),
       setTask: (task: string) => set({ currentTask: task }),
       setIsFullscreen: (full: boolean) => set({ isFullscreen: full }),
+      setSidebarCollapsed: (collapsed: boolean) => set({ sidebarCollapsed: collapsed }),
+      resetUserContext: () => {
+        set({
+          currentSubjectId: null,
+          currentTask: "",
+          accumulatedSeconds: 0,
+          startTime: null,
+          isRunning: false,
+          sessionStartedAt: null,
+        });
+      },
 
       setPomodoroConfig: (config: Partial<PomodoroConfig>) => {
         set((state) => {
@@ -420,6 +435,7 @@ export const useTimerStore = create<TimerState>()(
         currentSubjectId: state.currentSubjectId,
         currentTask: state.currentTask,
         sessionStartedAt: state.sessionStartedAt,
+        sidebarCollapsed: state.sidebarCollapsed,
       }),
     }
   )

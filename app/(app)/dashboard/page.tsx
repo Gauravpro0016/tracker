@@ -16,6 +16,7 @@ import {
   BookOpen,
   Target,
   ListTodo,
+  Trophy,
 } from "lucide-react";
 import {
   BarChart,
@@ -132,13 +133,13 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6 max-w-6xl mx-auto pb-12 animate-fade-in">
       {/* Header Greeting & Daily Quote */}
-      <div className="p-6 md:p-8 rounded-3xl bg-neutral-950/70 backdrop-blur-md border border-neutral-800 shadow-xl relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div className="p-4 sm:p-6 md:p-8 rounded-3xl bg-neutral-950/70 backdrop-blur-md border border-neutral-800 shadow-xl relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-5 sm:gap-6">
         <div>
           <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-neutral-400 mb-1">
             <Sparkles className="w-3.5 h-3.5 text-amber-400" />
             <span>Daily Overview</span>
           </div>
-          <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-white">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-white">
             {greeting}, {session?.user?.name ? session.user.name.split(" ")[0] : "Scholar"}
           </h1>
           <p className="text-xs md:text-sm text-neutral-400 italic mt-2 max-w-xl">
@@ -148,7 +149,7 @@ export default function DashboardPage() {
 
         <Link
           href="/"
-          className="self-start md:self-center px-6 py-3.5 rounded-2xl bg-white hover:bg-neutral-200 text-black font-bold text-xs sm:text-sm transition-all flex items-center gap-2 active:scale-95 shadow-lg shrink-0"
+          className="self-start md:self-center px-5 sm:px-6 py-3 sm:py-3.5 rounded-2xl bg-white hover:bg-neutral-200 text-black font-bold text-xs sm:text-sm transition-all flex items-center gap-2 active:scale-95 shadow-lg shrink-0"
         >
           <Play className="w-4 h-4 fill-black" />
           <span>Launch Timer</span>
@@ -156,58 +157,58 @@ export default function DashboardPage() {
       </div>
 
       {/* 4 Stat Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
         {/* Today's Study Time */}
-        <div className="p-4 sm:p-5 rounded-2xl bg-neutral-950/60 border border-neutral-800 backdrop-blur-sm">
-          <div className="flex items-center justify-between text-neutral-400 text-xs font-medium mb-2">
+        <div className="p-3.5 sm:p-5 rounded-2xl bg-neutral-950/60 border border-neutral-800 backdrop-blur-sm">
+          <div className="flex items-center justify-between text-neutral-400 text-xs font-medium mb-1.5 sm:mb-2">
             <span>Today's Focus</span>
             <Clock className="w-4 h-4 text-neutral-500" />
           </div>
-          <div className="text-2xl sm:text-3xl font-bold font-mono text-white">
+          <div className="text-xl sm:text-2xl md:text-3xl font-bold font-mono text-white truncate">
             {formatTime(todaySecs, false)}
           </div>
-          <span className="text-[11px] text-neutral-500 mt-1 block">
+          <span className="text-[10px] sm:text-[11px] text-neutral-500 mt-1 block">
             Target: 15m minimum
           </span>
         </div>
 
         {/* Current Streak */}
-        <div className="p-4 sm:p-5 rounded-2xl bg-neutral-950/60 border border-neutral-800 backdrop-blur-sm">
-          <div className="flex items-center justify-between text-neutral-400 text-xs font-medium mb-2">
+        <div className="p-3.5 sm:p-5 rounded-2xl bg-neutral-950/60 border border-neutral-800 backdrop-blur-sm">
+          <div className="flex items-center justify-between text-neutral-400 text-xs font-medium mb-1.5 sm:mb-2">
             <span>Current Streak</span>
             <Flame className="w-4 h-4 text-amber-500 fill-amber-500" />
           </div>
-          <div className="text-2xl sm:text-3xl font-bold font-mono text-amber-400 flex items-baseline gap-1.5">
+          <div className="text-xl sm:text-2xl md:text-3xl font-bold font-mono text-amber-400 flex items-baseline gap-1.5">
             <span>{currentStreak}</span>
             <span className="text-xs text-neutral-400 font-sans font-medium">days</span>
           </div>
-          <span className="text-[11px] text-neutral-500 mt-1 block">
+          <span className="text-[10px] sm:text-[11px] text-neutral-500 mt-1 block">
             Best: {analytics?.streak?.longestStreak || currentStreak} days
           </span>
         </div>
 
         {/* This Week's Hours */}
-        <div className="p-4 sm:p-5 rounded-2xl bg-neutral-950/60 border border-neutral-800 backdrop-blur-sm">
-          <div className="flex items-center justify-between text-neutral-400 text-xs font-medium mb-2">
+        <div className="p-3.5 sm:p-5 rounded-2xl bg-neutral-950/60 border border-neutral-800 backdrop-blur-sm">
+          <div className="flex items-center justify-between text-neutral-400 text-xs font-medium mb-1.5 sm:mb-2">
             <span>This Week</span>
             <TrendingUp className="w-4 h-4 text-emerald-400" />
           </div>
-          <div className="text-2xl sm:text-3xl font-bold font-mono text-white flex items-baseline gap-1">
+          <div className="text-xl sm:text-2xl md:text-3xl font-bold font-mono text-white flex items-baseline gap-1">
             <span>{thisWeekHours}</span>
             <span className="text-xs text-neutral-400 font-sans font-medium">hrs</span>
           </div>
-          <span className="text-[11px] text-neutral-500 mt-1 block">
+          <span className="text-[10px] sm:text-[11px] text-neutral-500 mt-1 block">
             {analytics?.stats?.weekPercentChange ? `${analytics.stats.weekPercentChange}% vs last week` : "Active pacing"}
           </span>
         </div>
 
         {/* Goal Progress */}
-        <div className="p-4 sm:p-5 rounded-2xl bg-neutral-950/60 border border-neutral-800 backdrop-blur-sm">
-          <div className="flex items-center justify-between text-neutral-400 text-xs font-medium mb-2">
+        <div className="p-3.5 sm:p-5 rounded-2xl bg-neutral-950/60 border border-neutral-800 backdrop-blur-sm">
+          <div className="flex items-center justify-between text-neutral-400 text-xs font-medium mb-1.5 sm:mb-2">
             <span>Weekly Target</span>
             <Target className="w-4 h-4 text-sky-400" />
           </div>
-          <div className="text-2xl sm:text-3xl font-bold font-mono text-white">
+          <div className="text-xl sm:text-2xl md:text-3xl font-bold font-mono text-white">
             {Math.min(100, Math.round((thisWeekHours / 15) * 100))}%
           </div>
           <div className="w-full bg-neutral-900 h-1.5 rounded-full mt-2 overflow-hidden">
@@ -327,6 +328,30 @@ export default function DashboardPage() {
             Manage Focus Tasks
           </Link>
         </div>
+      </div>
+
+      {/* Global Rankings Banner */}
+      <div className="p-4 sm:p-5 rounded-2xl bg-neutral-950/70 border border-neutral-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 shrink-0">
+            <Trophy className="w-5 h-5" />
+          </div>
+          <div>
+            <h4 className="text-sm font-bold text-white flex items-center gap-2">
+              <span>Scholar Rankings & Leaderboard</span>
+            </h4>
+            <p className="text-xs text-neutral-400">
+              See where you stand among top scholars worldwide this week.
+            </p>
+          </div>
+        </div>
+        <Link
+          href="/leaderboard"
+          className="px-4 py-2 rounded-xl bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-xs font-bold text-white transition-all flex items-center justify-center gap-1.5 shrink-0"
+        >
+          <span>View Rankings</span>
+          <ArrowRight className="w-3.5 h-3.5" />
+        </Link>
       </div>
 
       {/* Bottom Grid: Recent Sessions & Upcoming Planner Items */}

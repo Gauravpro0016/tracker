@@ -57,12 +57,18 @@ export async function PATCH(req: NextRequest) {
     if (body.targetExam !== undefined) user.targetExam = body.targetExam;
 
     if (body.theme !== undefined) {
-      user.theme = { ...(user.theme || {}), ...body.theme };
+      const existingTheme = user.theme && typeof (user.theme as any).toObject === "function"
+        ? (user.theme as any).toObject()
+        : user.theme || {};
+      user.theme = { ...existingTheme, ...body.theme };
       user.markModified("theme");
     }
 
     if (body.wallpaper !== undefined) {
-      user.wallpaper = { ...(user.wallpaper || {}), ...body.wallpaper };
+      const existingWallpaper = user.wallpaper && typeof (user.wallpaper as any).toObject === "function"
+        ? (user.wallpaper as any).toObject()
+        : user.wallpaper || {};
+      user.wallpaper = { ...existingWallpaper, ...body.wallpaper };
       user.markModified("wallpaper");
     }
 

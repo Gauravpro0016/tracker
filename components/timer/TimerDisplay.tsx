@@ -26,13 +26,18 @@ export default function TimerDisplay({ seconds }: TimerDisplayProps) {
   const showHours = h > 0;
   const showSeconds = theme.showSeconds;
 
+  // Fluid responsive font size that adapts seamlessly to phones, tabs, laptops, and large screens
+  const dynamicFontSize = showHours
+    ? `clamp(2.2rem, 11.5vw, ${theme.timerFontSize || "6rem"})`
+    : `clamp(3.2rem, 17vw, ${theme.timerFontSize || "7.5rem"})`;
+
   return (
-    <div className="flex flex-col items-center justify-center select-none py-6" suppressHydrationWarning>
+    <div className="flex flex-col items-center justify-center select-none py-4 sm:py-6 w-full max-w-full overflow-hidden" suppressHydrationWarning>
       {/* Pomodoro Phase & Cycle Badge */}
       {mode === "pomodoro" && (
-        <div className="flex items-center gap-2 mb-4 px-3 py-1 rounded-full bg-neutral-900/80 border border-neutral-800 text-xs" suppressHydrationWarning>
+        <div className="flex items-center gap-1.5 sm:gap-2 mb-3 sm:mb-4 px-2.5 sm:px-3 py-1 rounded-full bg-neutral-900/80 border border-neutral-800 text-[11px] sm:text-xs" suppressHydrationWarning>
           <span
-            className={`w-2 h-2 rounded-full ${
+            className={`w-2 h-2 rounded-full shrink-0 ${
               pomodoroPhase === "focus"
                 ? "bg-rose-500 animate-pulse"
                 : pomodoroPhase === "shortBreak"
@@ -56,8 +61,8 @@ export default function TimerDisplay({ seconds }: TimerDisplayProps) {
 
       {/* Main Large Digits */}
       <div
-        className="font-mono font-bold tracking-tight text-white flex items-center justify-center transition-all"
-        style={{ fontSize: theme.timerFontSize || "7.5rem", lineHeight: "1" }}
+        className="font-mono font-bold tracking-tight text-white flex items-center justify-center transition-all max-w-full"
+        style={{ fontSize: dynamicFontSize, lineHeight: "1" }}
         suppressHydrationWarning
       >
         {theme.digitStyle === "flip" ? (

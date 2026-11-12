@@ -194,7 +194,7 @@ function TimerTodoList() {
 
                 <button
                   onClick={() => deleteTaskMutation.mutate(taskId)}
-                  className="opacity-0 group-hover:opacity-100 p-1 text-neutral-500 hover:text-rose-400 rounded transition-all shrink-0 ml-2"
+                  className="opacity-70 sm:opacity-0 sm:group-hover:opacity-100 p-1 text-neutral-500 hover:text-rose-400 rounded transition-all shrink-0 ml-2"
                   title="Delete task"
                 >
                   <Trash2 className="w-3.5 h-3.5" />

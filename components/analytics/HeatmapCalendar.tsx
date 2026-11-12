@@ -54,7 +54,7 @@ export default function HeatmapCalendar({
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
   return (
-    <div className="w-full overflow-x-auto pb-2 select-none">
+    <div className="w-full overflow-x-auto pb-2 select-none touch-pan-x overscroll-x-contain">
       <div className="min-w-[700px]">
         {/* Months labels */}
         <div className="flex justify-between text-[10px] text-neutral-500 mb-2 px-1">
@@ -70,9 +70,10 @@ export default function HeatmapCalendar({
               {week.map((day) => (
                 <div
                   key={day.dateStr}
+                  onClick={() => setHoveredDay({ date: day.dateStr, seconds: day.seconds })}
                   onMouseEnter={() => setHoveredDay({ date: day.dateStr, seconds: day.seconds })}
                   onMouseLeave={() => setHoveredDay(null)}
-                  className={`w-3 h-3 rounded-[3px] border transition-transform hover:scale-125 cursor-pointer ${getColor(
+                  className={`w-3 h-3 rounded-[3px] border transition-transform hover:scale-125 active:scale-125 cursor-pointer ${getColor(
                     day.seconds
                   )}`}
                   title={`${day.dateStr}: ${formatStudyTime(day.seconds)}`}

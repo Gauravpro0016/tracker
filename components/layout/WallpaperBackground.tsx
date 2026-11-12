@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useThemeStore } from "@/store/themeStore";
+import { useThemeStore, BUILT_IN_WALLPAPERS } from "@/store/themeStore";
 
 export default function WallpaperBackground() {
   const { wallpaper } = useThemeStore();
@@ -10,6 +10,12 @@ export default function WallpaperBackground() {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  const resolveWallpaperUrl = (url?: string) => {
+    if (!url) return BUILT_IN_WALLPAPERS[0].url;
+    const match = BUILT_IN_WALLPAPERS.find((w) => w.id === url || w.url === url);
+    return match ? match.url : url;
+  };
 
   const getYouTubeEmbedUrl = (url: string) => {
     try {
@@ -33,17 +39,21 @@ export default function WallpaperBackground() {
     return <div className="fixed inset-0 pointer-events-none -z-10 bg-black select-none" />;
   }
 
+  const resolvedImageUrl = resolveWallpaperUrl(wallpaper.url);
+  const blurVal = wallpaper.blurAmount || 0;
+  const overlayVal = wallpaper.overlayOpacity !== undefined ? wallpaper.overlayOpacity : 0.5;
+
   return (
     <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden select-none">
       {/* Background Media */}
       {wallpaper.type === "preset" || wallpaper.type === "image" ? (
-        wallpaper.url ? (
+        resolvedImageUrl ? (
           <div
             className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-all duration-700"
             style={{
-              backgroundImage: `url(${wallpaper.url})`,
-              filter: `blur(${wallpaper.blurAmount}px)`,
-              transform: wallpaper.blurAmount > 0 ? "scale(1.05)" : "none",
+              backgroundImage: `url(${resolvedImageUrl})`,
+              filter: `blur(${blurVal}px)`,
+              transform: blurVal > 0 ? "scale(1.05)" : "none",
             }}
           />
         ) : null
@@ -56,8 +66,8 @@ export default function WallpaperBackground() {
             playsInline
             className="absolute inset-0 w-full h-full object-cover transition-all duration-700"
             style={{
-              filter: `blur(${wallpaper.blurAmount}px)`,
-              transform: wallpaper.blurAmount > 0 ? "scale(1.05)" : "none",
+              filter: `blur(${blurVal}px)`,
+              transform: blurVal > 0 ? "scale(1.05)" : "none",
             }}
           >
             <source src={wallpaper.url} type="video/mp4" />
@@ -70,7 +80,7 @@ export default function WallpaperBackground() {
             className="absolute inset-0 w-full h-full object-cover pointer-events-none border-0"
             allow="autoplay; encrypted-media"
             style={{
-              filter: `blur(${wallpaper.blurAmount}px)`,
+              filter: `blur(${blurVal}px)`,
               transform: "scale(1.25)",
             }}
           />
@@ -80,7 +90,7 @@ export default function WallpaperBackground() {
           className="absolute inset-0 transition-all duration-700"
           style={{
             background: wallpaper.url || "linear-gradient(135deg, #0a0a0a 0%, #171717 100%)",
-            filter: `blur(${wallpaper.blurAmount}px)`,
+            filter: `blur(${blurVal}px)`,
           }}
         />
       ) : null}
@@ -88,7 +98,7 @@ export default function WallpaperBackground() {
       {/* Dark Overlay Layer */}
       <div
         className="absolute inset-0 bg-black transition-opacity duration-300"
-        style={{ opacity: wallpaper.overlayOpacity }}
+        style={{ opacity: overlayVal }}
       />
     </div>
   );

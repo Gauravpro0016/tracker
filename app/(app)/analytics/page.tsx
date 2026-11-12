@@ -102,18 +102,18 @@ export default function AnalyticsPage() {
       {/* Header & Controls */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-extrabold tracking-tight">Study Analytics & Streaks</h1>
+          <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight">Study Analytics & Streaks</h1>
           <p className="text-xs text-neutral-400">Detailed insights into your focus hours and routines</p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
           {/* Range filter buttons */}
           <div className="flex items-center p-1 bg-neutral-900 border border-neutral-800 rounded-xl">
             {(["today", "week", "month", "year"] as const).map((r) => (
               <button
                 key={r}
                 onClick={() => setRange(r)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold capitalize transition-all ${
+                className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold capitalize transition-all ${
                   range === r
                     ? "bg-white text-black shadow"
                     : "text-neutral-400 hover:text-white"
@@ -127,7 +127,7 @@ export default function AnalyticsPage() {
           {/* Export CSV button */}
           <button
             onClick={handleExportCsv}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-xs font-medium text-neutral-300 hover:text-white transition-colors"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-xs font-medium text-neutral-300 hover:text-white transition-colors shrink-0"
             title="Download study data as CSV"
           >
             <Download className="w-3.5 h-3.5" />
@@ -137,7 +137,7 @@ export default function AnalyticsPage() {
       </div>
 
       {/* Streak Details Card */}
-      <div className="p-6 rounded-3xl bg-neutral-950/70 border border-neutral-800 backdrop-blur-md shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div className="p-4 sm:p-6 rounded-3xl bg-neutral-950/70 border border-neutral-800 backdrop-blur-md shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-5 sm:gap-6">
         <div className="flex items-center gap-4">
           <div className="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center shrink-0">
             <Flame className="w-8 h-8 text-amber-500 fill-amber-500" />
@@ -188,7 +188,7 @@ export default function AnalyticsPage() {
       </div>
 
       {/* GitHub-style 12-Month Heatmap Calendar */}
-      <div className="p-6 rounded-3xl bg-neutral-950/70 border border-neutral-800 backdrop-blur-md shadow-xl">
+      <div className="p-4 sm:p-6 rounded-3xl bg-neutral-950/70 border border-neutral-800 backdrop-blur-md shadow-xl">
         <div className="flex items-center justify-between mb-4">
           <div>
             <h3 className="text-sm font-bold text-white flex items-center gap-2">
@@ -205,8 +205,8 @@ export default function AnalyticsPage() {
       </div>
 
       {/* 6 Summary Stat Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-        <div className="p-4 rounded-2xl bg-neutral-950/60 border border-neutral-800">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-3">
+        <div className="p-3.5 sm:p-4 rounded-2xl bg-neutral-950/60 border border-neutral-800">
           <span className="text-[10px] text-neutral-500 uppercase block font-semibold mb-1">
             Total Hours
           </span>
@@ -215,7 +215,7 @@ export default function AnalyticsPage() {
           </span>
         </div>
 
-        <div className="p-4 rounded-2xl bg-neutral-950/60 border border-neutral-800">
+        <div className="p-3.5 sm:p-4 rounded-2xl bg-neutral-950/60 border border-neutral-800">
           <span className="text-[10px] text-neutral-500 uppercase block font-semibold mb-1">
             Avg / Day
           </span>
@@ -224,7 +224,7 @@ export default function AnalyticsPage() {
           </span>
         </div>
 
-        <div className="p-4 rounded-2xl bg-neutral-950/60 border border-neutral-800">
+        <div className="p-3.5 sm:p-4 rounded-2xl bg-neutral-950/60 border border-neutral-800">
           <span className="text-[10px] text-neutral-500 uppercase block font-semibold mb-1">
             Best Day
           </span>
@@ -236,7 +236,7 @@ export default function AnalyticsPage() {
           </span>
         </div>
 
-        <div className="p-4 rounded-2xl bg-neutral-950/60 border border-neutral-800">
+        <div className="p-3.5 sm:p-4 rounded-2xl bg-neutral-950/60 border border-neutral-800">
           <span className="text-[10px] text-neutral-500 uppercase block font-semibold mb-1">
             Longest Session
           </span>
@@ -245,7 +245,7 @@ export default function AnalyticsPage() {
           </span>
         </div>
 
-        <div className="p-4 rounded-2xl bg-neutral-950/60 border border-neutral-800">
+        <div className="p-3.5 sm:p-4 rounded-2xl bg-neutral-950/60 border border-neutral-800">
           <span className="text-[10px] text-neutral-500 uppercase block font-semibold mb-1">
             Total Sessions
           </span>
@@ -254,7 +254,7 @@ export default function AnalyticsPage() {
           </span>
         </div>
 
-        <div className="p-4 rounded-2xl bg-neutral-950/60 border border-neutral-800">
+        <div className="p-3.5 sm:p-4 rounded-2xl bg-neutral-950/60 border border-neutral-800">
           <span className="text-[10px] text-neutral-500 uppercase block font-semibold mb-1">
             Top Subject
           </span>
@@ -270,7 +270,7 @@ export default function AnalyticsPage() {
       {/* Main Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Daily Study Hours Bar Chart */}
-        <div className="p-6 rounded-3xl bg-neutral-950/60 border border-neutral-800 backdrop-blur-md">
+        <div className="p-4 sm:p-6 rounded-3xl bg-neutral-950/60 border border-neutral-800 backdrop-blur-md">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-bold text-white">Study Hours per Day</h3>
             <span className="text-xs text-neutral-400 capitalize">{range} View</span>
@@ -311,7 +311,7 @@ export default function AnalyticsPage() {
         </div>
 
         {/* Donut Chart: Time Split by Subject */}
-        <div className="p-6 rounded-3xl bg-neutral-950/60 border border-neutral-800 backdrop-blur-md">
+        <div className="p-4 sm:p-6 rounded-3xl bg-neutral-950/60 border border-neutral-800 backdrop-blur-md">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-bold text-white">Subject Distribution</h3>
             <span className="text-xs text-neutral-400">Share of Focus</span>
@@ -322,8 +322,8 @@ export default function AnalyticsPage() {
               No subject data logged for this period.
             </div>
           ) : (
-            <div className="flex flex-col sm:flex-row items-center gap-4 h-64">
-              <div className="h-full w-full sm:w-1/2">
+            <div className="flex flex-col sm:flex-row items-center gap-4 h-auto sm:h-64">
+              <div className="h-56 sm:h-full w-full sm:w-1/2">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
@@ -383,7 +383,7 @@ export default function AnalyticsPage() {
         </div>
 
         {/* Hourly Productivity (0-23 hours) */}
-        <div className="lg:col-span-2 p-6 rounded-3xl bg-neutral-950/60 border border-neutral-800 backdrop-blur-md">
+        <div className="lg:col-span-2 p-4 sm:p-6 rounded-3xl bg-neutral-950/60 border border-neutral-800 backdrop-blur-md">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="text-sm font-bold text-white flex items-center gap-2">

@@ -23,13 +23,13 @@ function ModeTabs() {
           <button
             key={tab.key}
             onClick={() => setMode(tab.key)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
+            className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
               isActive
                 ? "bg-white text-black shadow-md"
                 : "text-neutral-400 hover:text-white hover:bg-neutral-800/50"
             }`}
           >
-            <Icon className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${isActive ? "text-black" : "text-neutral-400"}`} />
+            <Icon className={`w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 ${isActive ? "text-black" : "text-neutral-400"}`} />
             <span>{tab.label}</span>
           </button>
         );

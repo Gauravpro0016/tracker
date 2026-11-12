@@ -94,16 +94,17 @@ function ManualSessionModal({ subjects }: ManualSessionModalProps) {
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-neutral-900/60 hover:bg-neutral-800 text-neutral-400 hover:text-white border border-neutral-800 text-xs font-medium transition-colors"
+        className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-neutral-900/60 hover:bg-neutral-800 text-neutral-400 hover:text-white border border-neutral-800 text-xs font-medium transition-colors shrink-0"
         title="Add manual study session"
       >
         <PlusCircle className="w-3.5 h-3.5" />
-        <span>Log Offline Study</span>
+        <span className="hidden sm:inline">Log Offline Study</span>
+        <span className="sm:hidden">Log</span>
       </button>
 
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
-          <div className="w-full max-w-md bg-neutral-950 border border-neutral-800 rounded-3xl p-6 shadow-2xl relative text-white">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
+          <div className="w-full max-w-md max-h-[90vh] overflow-y-auto bg-neutral-950 border border-neutral-800 rounded-3xl p-5 sm:p-6 shadow-2xl relative text-white">
             <div className="flex items-center justify-between pb-4 border-b border-neutral-800">
               <h3 className="text-base font-bold tracking-tight">Log Manual Study Time</h3>
               <button

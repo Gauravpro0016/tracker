@@ -215,8 +215,8 @@ function SubjectTaskBar() {
 
       {/* Modal: Create Subject */}
       {showAddSubject && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="w-full max-w-xs bg-neutral-950 border border-neutral-800 rounded-2xl p-5 shadow-2xl text-white">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-sm overflow-y-auto">
+          <div className="w-full max-w-xs bg-neutral-950 border border-neutral-800 rounded-2xl p-5 shadow-2xl text-white max-h-[90vh] overflow-y-auto">
             <h4 className="text-sm font-bold mb-3">Add Study Subject</h4>
             <form onSubmit={handleCreateSubject} className="space-y-3">
               <div>

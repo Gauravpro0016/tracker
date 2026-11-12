@@ -329,10 +329,10 @@ export default function ProfilePage() {
   return (
     <div className="space-y-8 max-w-5xl mx-auto pb-20 animate-fade-in text-white">
       {/* Profile Header with Avatar & Rank */}
-      <div className="p-6 md:p-8 rounded-3xl bg-neutral-950/70 border border-neutral-800 backdrop-blur-md shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div className="p-4 sm:p-6 md:p-8 rounded-3xl bg-neutral-950/70 border border-neutral-800 backdrop-blur-md shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5">
           {/* Avatar with upload hover & camera badge */}
-          <div className="relative group w-24 h-24 rounded-full border-2 border-neutral-700 bg-neutral-900 flex items-center justify-center shrink-0 overflow-hidden shadow-lg">
+          <div className="relative group w-20 h-20 sm:w-24 sm:h-24 rounded-full border-2 border-neutral-700 bg-neutral-900 flex items-center justify-center shrink-0 overflow-hidden shadow-lg">
             {displayedAvatar ? (
               <img
                 src={displayedAvatar}
@@ -340,7 +340,7 @@ export default function ProfilePage() {
                 className="w-full h-full object-cover"
               />
             ) : (
-              <span className="text-3xl font-black text-white">
+              <span className="text-2xl sm:text-3xl font-black text-white">
                 {(user?.name || session.user.name || "U")[0].toUpperCase()}
               </span>
             )}
@@ -354,10 +354,10 @@ export default function ProfilePage() {
               title="Change profile picture"
             >
               {isUploadingAvatar ? (
-                <Loader2 className="w-6 h-6 text-white animate-spin" />
+                <Loader2 className="w-5 h-5 sm:w-6 sm:h-6 text-white animate-spin" />
               ) : (
                 <>
-                  <Camera className="w-5 h-5 text-white" />
+                  <Camera className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                   <span className="text-[9px] text-neutral-300 font-medium mt-1">Change</span>
                 </>
               )}
@@ -403,7 +403,7 @@ export default function ProfilePage() {
         </div>
 
         {/* Public Stats Summary */}
-        <div className="flex items-center gap-4 border-t md:border-t-0 md:border-l border-neutral-800 pt-4 md:pt-0 md:pl-6">
+        <div className="flex items-center justify-around sm:justify-start gap-4 border-t md:border-t-0 md:border-l border-neutral-800 pt-4 md:pt-0 md:pl-6 w-full md:w-auto">
           <div className="text-center px-3">
             <span className="text-xl font-bold font-mono text-white block">
               {totalHours}h
@@ -597,26 +597,29 @@ export default function ProfilePage() {
                 <p className="text-xs text-neutral-300">
                   Type <span className="font-mono font-bold text-rose-400">DELETE</span> to confirm:
                 </p>
-                <div className="flex gap-2">
+                <div className="flex flex-col sm:flex-row gap-2">
                   <input
                     type="text"
                     value={deleteInput}
                     onChange={(e) => setDeleteInput(e.target.value)}
-                    className="flex-1 px-3 py-1.5 bg-neutral-900 border border-neutral-800 rounded-xl text-xs text-white focus:outline-none focus:border-rose-500 font-mono"
+                    placeholder="Type DELETE"
+                    className="flex-1 px-3 py-2 bg-neutral-900 border border-neutral-800 rounded-xl text-xs text-white focus:outline-none focus:border-rose-500 font-mono"
                   />
-                  <button
-                    disabled={deleteInput !== "DELETE" || deleteAccountMutation.isPending}
-                    onClick={() => deleteAccountMutation.mutate()}
-                    className="px-4 py-1.5 bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs rounded-xl disabled:opacity-40"
-                  >
-                    Confirm Delete
-                  </button>
-                  <button
-                    onClick={() => setShowDeleteConfirm(false)}
-                    className="px-3 py-1.5 text-xs text-neutral-400 hover:text-white"
-                  >
-                    Cancel
-                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      disabled={deleteInput !== "DELETE" || deleteAccountMutation.isPending}
+                      onClick={() => deleteAccountMutation.mutate()}
+                      className="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs rounded-xl disabled:opacity-40 shrink-0"
+                    >
+                      Confirm Delete
+                    </button>
+                    <button
+                      onClick={() => setShowDeleteConfirm(false)}
+                      className="px-3 py-2 text-xs text-neutral-400 hover:text-white shrink-0"
+                    >
+                      Cancel
+                    </button>
+                  </div>
                 </div>
               </div>
             )}

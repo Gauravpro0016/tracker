@@ -138,6 +138,7 @@ export const habitLogSchema = z.object({
 
 export const goalSchema = z.object({
   title: z.string().min(1, "Goal title is required").max(100),
+  subjectId: z.string().nullable().optional(),
   type: z.enum(["daily", "weekly", "monthly"]).default("daily"),
   targetHours: z.number().min(0.1).max(100),
   active: z.boolean().default(true),

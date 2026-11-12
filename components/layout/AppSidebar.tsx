@@ -4,12 +4,13 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Timer,
   LayoutDashboard,
   Calendar,
   BarChart3,
+  Trophy,
   CheckSquare,
   Target,
   User as UserIcon,
@@ -32,7 +33,8 @@ interface SidebarProps {
 function AppSidebar({ mobileOpen, setMobileOpen }: SidebarProps) {
   const pathname = usePathname();
   const { data: session } = useSession();
-  const [collapsed, setCollapsed] = useState(false);
+  const collapsed = useTimerStore((state) => state.sidebarCollapsed);
+  const setCollapsed = useTimerStore((state) => state.setSidebarCollapsed);
   const isRunning = useTimerStore((state) => state.isRunning);
   const mode = useTimerStore((state) => state.mode);
 
@@ -51,11 +53,21 @@ function AppSidebar({ mobileOpen, setMobileOpen }: SidebarProps) {
   const sidebarAvatar = userProfile?.avatar || session?.user?.image;
   const sidebarName = userProfile?.name || session?.user?.name;
 
+  const queryClient = useQueryClient();
+  const resetUserContext = useTimerStore((state) => state.resetUserContext);
+
+  const handleSignOut = () => {
+    resetUserContext();
+    queryClient.clear();
+    signOut({ callbackUrl: "/login" });
+  };
+
   const navItems = [
     { label: "Timer", href: "/", icon: Timer, highlight: isRunning },
     { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
     { label: "Study Planner", href: "/planner", icon: Calendar },
     { label: "Analytics", href: "/analytics", icon: BarChart3 },
+    { label: "Rankings", href: "/leaderboard", icon: Trophy },
     { label: "Habits", href: "/habits", icon: CheckSquare },
     { label: "Goals", href: "/goals", icon: Target },
     { label: "Profile", href: "/profile", icon: UserIcon },
@@ -74,15 +86,15 @@ function AppSidebar({ mobileOpen, setMobileOpen }: SidebarProps) {
 
       {/* Sidebar Container */}
       <aside
-        className={`fixed top-0 bottom-0 left-0 z-40 bg-black/80 backdrop-blur-xl border-r border-neutral-800 transition-all duration-300 flex flex-col justify-between ${
-          collapsed ? "w-20" : "w-64"
+        className={`fixed top-0 bottom-0 left-0 z-40 bg-black/90 backdrop-blur-xl border-r border-neutral-800 transition-all duration-300 flex flex-col justify-between shadow-2xl ${
+          collapsed ? "lg:w-20 w-64 max-w-[85vw]" : "w-64 max-w-[85vw]"
         } ${
           mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         }`}
       >
-        {/* Top: Logo & Toggle */}
-        <div>
-          <div className="h-16 flex items-center justify-between px-4 border-b border-neutral-800">
+        {/* Top: Logo & Navigation */}
+        <div className="flex-1 flex flex-col min-h-0">
+          <div className="h-16 flex items-center justify-between px-4 border-b border-neutral-800 shrink-0">
             <Link
               href="/"
               className="flex items-center gap-3 overflow-hidden"
@@ -91,7 +103,7 @@ function AppSidebar({ mobileOpen, setMobileOpen }: SidebarProps) {
               <div className="w-9 h-9 rounded-xl bg-white text-black flex items-center justify-center font-bold tracking-tighter shrink-0">
                 FD
               </div>
-              {!collapsed && (
+              {(!collapsed || mobileOpen) && (
                 <div className="flex flex-col">
                   <span className="font-semibold tracking-tight text-white text-base">
                     FocusDesk
@@ -116,8 +128,8 @@ function AppSidebar({ mobileOpen, setMobileOpen }: SidebarProps) {
             </button>
           </div>
 
-          {/* Navigation Items */}
-          <nav className="p-3 space-y-1">
+          {/* Navigation Items (smoothly scrolls on short screen heights) */}
+          <nav className="p-3 space-y-1 flex-1 overflow-y-auto overscroll-contain">
             {navItems.map((item) => {
               const isActive = pathname === item.href;
               const Icon = item.icon;
@@ -132,20 +144,20 @@ function AppSidebar({ mobileOpen, setMobileOpen }: SidebarProps) {
                       ? "bg-white text-black font-semibold shadow-sm"
                       : "text-neutral-400 hover:text-white hover:bg-neutral-900/60"
                   }`}
-                  title={collapsed ? item.label : undefined}
+                  title={collapsed && !mobileOpen ? item.label : undefined}
                 >
                   <Icon
                     className={`w-5 h-5 shrink-0 transition-transform ${
                       isActive ? "text-black" : "text-neutral-400 group-hover:text-white"
                     }`}
                   />
-                  {!collapsed && <span>{item.label}</span>}
+                  {(!collapsed || mobileOpen) && <span>{item.label}</span>}
 
                   {/* Active timer pulse indicator */}
                   {item.highlight && (
                     <span
                       className={`w-2 h-2 rounded-full bg-emerald-400 animate-pulse ml-auto ${
-                        collapsed ? "absolute top-2 right-2" : ""
+                        collapsed && !mobileOpen ? "absolute top-2 right-2" : ""
                       }`}
                     />
                   )}
@@ -156,11 +168,11 @@ function AppSidebar({ mobileOpen, setMobileOpen }: SidebarProps) {
         </div>
 
         {/* Bottom User Area */}
-        <div className="p-3 border-t border-neutral-800">
+        <div className="p-3 border-t border-neutral-800 shrink-0">
           {session?.user ? (
             <div
               className={`flex items-center gap-3 p-2 rounded-xl bg-neutral-900/40 border border-neutral-800/60 ${
-                collapsed ? "justify-center" : ""
+                collapsed && !mobileOpen ? "justify-center" : ""
               }`}
             >
               <Link
@@ -179,7 +191,7 @@ function AppSidebar({ mobileOpen, setMobileOpen }: SidebarProps) {
                 )}
               </Link>
 
-              {!collapsed && (
+              {(!collapsed || mobileOpen) && (
                 <Link href="/profile" className="flex-1 min-w-0 hover:opacity-80 transition-opacity">
                   <p className="text-xs font-semibold text-white truncate">
                     {sidebarName}
@@ -192,9 +204,9 @@ function AppSidebar({ mobileOpen, setMobileOpen }: SidebarProps) {
                 </Link>
               )}
 
-              {!collapsed && (
+              {(!collapsed || mobileOpen) && (
                 <button
-                  onClick={() => signOut({ callbackUrl: "/login" })}
+                  onClick={handleSignOut}
                   className="p-1.5 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-lg transition-colors"
                   title="Sign out"
                 >
@@ -204,7 +216,7 @@ function AppSidebar({ mobileOpen, setMobileOpen }: SidebarProps) {
             </div>
           ) : (
             <div className="space-y-2">
-              {!collapsed ? (
+              {(!collapsed || mobileOpen) ? (
                 <div className="p-2.5 rounded-xl bg-neutral-900/60 border border-neutral-800 text-xs">
                   <div className="flex items-center gap-1.5 text-neutral-300 font-medium mb-1">
                     <Sparkles className="w-3.5 h-3.5 text-amber-400" /> Guest Mode

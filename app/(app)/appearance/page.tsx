@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useSession } from "next-auth/react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Palette,
   Image as ImageIcon,
@@ -25,6 +25,7 @@ import { toast } from "sonner";
 
 export default function AppearancePage() {
   const { data: session } = useSession();
+  const queryClient = useQueryClient();
   const {
     theme,
     wallpaper,
@@ -41,17 +42,27 @@ export default function AppearancePage() {
   // Sync to database if logged in
   const syncUserAppearanceMutation = useMutation({
     mutationFn: async (payload: { theme?: any; wallpaper?: any }) => {
-      if (!session?.user) return;
+      if (!session?.user) return null;
       const res = await fetch("/api/user", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      if (!res.ok) throw new Error("Failed to save appearance");
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || "Failed to save appearance");
+      }
       return res.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      if (data && session?.user?.email) {
+        queryClient.setQueryData(["userProfile", session.user.email], data);
+      }
+      queryClient.invalidateQueries({ queryKey: ["userProfile"] });
       toast.success("Appearance saved to profile");
+    },
+    onError: (err: any) => {
+      toast.error(err.message || "Failed to save appearance");
     },
   });
 
@@ -62,13 +73,15 @@ export default function AppearancePage() {
 
   const handleThemeChange = (updates: any) => {
     setTheme(updates);
-    syncUserAppearanceMutation.mutate({ theme: { ...theme, ...updates } });
+    const latestTheme = { ...useThemeStore.getState().theme, ...updates };
+    syncUserAppearanceMutation.mutate({ theme: latestTheme });
   };
 
   const handleWallpaperChange = (updates: any) => {
     setWallpaper(updates);
+    const latestWallpaper = { ...useThemeStore.getState().wallpaper, ...updates };
     syncUserAppearanceMutation.mutate({
-      wallpaper: { ...wallpaper, ...updates },
+      wallpaper: latestWallpaper,
     });
   };
 
@@ -81,7 +94,7 @@ export default function AppearancePage() {
     toast.success("Reset to default minimal theme");
   };
 
-  // Signed Cloudinary client-side upload handler
+  // Direct server upload with Cloudinary and persistent fallback
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, isVideo = false) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -92,64 +105,57 @@ export default function AppearancePage() {
     }
 
     setUploading(true);
+    toast.loading(isVideo ? "Uploading background video..." : "Uploading wallpaper...", {
+      id: "wallpaper-upload",
+    });
+
     try {
-      // 1. Get signed signature from /api/upload
-      const signRes = await fetch("/api/upload", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ folder: "focusdesk/wallpapers" }),
-      });
+      let finalUrl = "";
 
-      if (!signRes.ok) {
-        // Fallback to local object URL if offline/unconfigured
-        const localUrl = URL.createObjectURL(file);
-        handleWallpaperChange({
-          type: isVideo ? "video" : "image",
-          url: localUrl,
+      // 1. Upload via multipart form-data to /api/upload (Cloudinary server stream)
+      try {
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("folder", isVideo ? "focusdesk/videos" : "focusdesk/wallpapers");
+
+        const uploadRes = await fetch("/api/upload", {
+          method: "POST",
+          body: formData,
         });
-        toast.info("Applied as local wallpaper");
-        setUploading(false);
-        return;
+
+        if (uploadRes.ok) {
+          const data = await uploadRes.json();
+          if (data.url) {
+            finalUrl = data.url;
+          }
+        }
+      } catch (uploadErr) {
+        console.warn("Direct upload error:", uploadErr);
       }
 
-      const { timestamp, signature, apiKey, cloudName, folder } = await signRes.json();
-
-      // 2. Upload directly to Cloudinary
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("api_key", apiKey);
-      formData.append("timestamp", timestamp.toString());
-      formData.append("signature", signature);
-      formData.append("folder", folder);
-
-      const endpoint = isVideo
-        ? `https://api.cloudinary.com/v1_1/${cloudName}/video/upload`
-        : `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`;
-
-      const uploadRes = await fetch(endpoint, {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!uploadRes.ok) {
-        throw new Error("Cloudinary upload failed");
+      // 2. Fallback to base64 Data URL for images if direct Cloudinary upload failed
+      if (!finalUrl && !isVideo) {
+        finalUrl = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
       }
 
-      const data = await uploadRes.json();
+      if (!finalUrl) {
+        throw new Error("Could not process uploaded file");
+      }
+
       handleWallpaperChange({
         type: isVideo ? "video" : "image",
-        url: data.secure_url,
+        url: finalUrl,
       });
-      toast.success("Wallpaper uploaded and saved!");
+
+      toast.success("Wallpaper uploaded and saved!", { id: "wallpaper-upload" });
     } catch (err: any) {
-      console.warn("Upload error:", err);
-      // Fallback
-      const localUrl = URL.createObjectURL(file);
-      handleWallpaperChange({
-        type: isVideo ? "video" : "image",
-        url: localUrl,
-      });
-      toast.info("Applied local wallpaper preview");
+      console.error("Upload error:", err);
+      toast.error(err.message || "Failed to upload wallpaper", { id: "wallpaper-upload" });
     } finally {
       setUploading(false);
     }
@@ -176,18 +182,18 @@ export default function AppearancePage() {
       </div>
 
       {/* Live Preview Box */}
-      <div className="p-6 md:p-8 rounded-3xl bg-neutral-950/80 border border-neutral-800 backdrop-blur-xl shadow-2xl relative overflow-hidden">
+      <div className="p-4 sm:p-6 md:p-8 rounded-3xl bg-neutral-950/80 border border-neutral-800 backdrop-blur-xl shadow-2xl relative overflow-hidden">
         <div className="flex items-center justify-between mb-4">
           <span className="text-xs font-semibold uppercase tracking-wider text-neutral-400 flex items-center gap-1.5">
             <Eye className="w-3.5 h-3.5" /> Live Preview
           </span>
-          <span className="text-[10px] text-neutral-500 font-mono">
+          <span className="text-[10px] text-neutral-500 font-mono truncate max-w-[200px]">
             {theme.fontChoice} • {theme.digitStyle} • {theme.borderRadius}px radius
           </span>
         </div>
 
         <div
-          className="py-10 px-6 rounded-2xl flex flex-col items-center justify-center transition-all select-none border"
+          className="py-8 sm:py-10 px-4 sm:px-6 rounded-2xl flex flex-col items-center justify-center transition-all select-none border"
           style={{
             backgroundColor: theme.cardColor,
             borderColor: theme.borderColor,
@@ -202,10 +208,10 @@ export default function AppearancePage() {
           </div>
 
           <div
-            className="font-mono font-bold tracking-tight my-2"
+            className="font-mono font-bold tracking-tight my-2 text-center"
             style={{
               color: theme.textColor,
-              fontSize: "4.5rem",
+              fontSize: "clamp(2.5rem, 8vw, 4.5rem)",
               lineHeight: 1,
             }}
           >
@@ -214,7 +220,7 @@ export default function AppearancePage() {
 
           <div className="flex items-center gap-3 mt-4">
             <div
-              className="px-6 py-2 rounded-xl text-xs font-bold transition-transform shadow-md"
+              className="px-5 sm:px-6 py-2 rounded-xl text-xs font-bold transition-transform shadow-md"
               style={{
                 backgroundColor: theme.accentColor,
                 color: theme.backgroundColor === "#ffffff" ? "#ffffff" : "#000000",
@@ -224,7 +230,7 @@ export default function AppearancePage() {
               Start Timer
             </div>
             <div
-              className="px-4 py-2 rounded-xl text-xs font-semibold border transition-colors"
+              className="px-3.5 sm:px-4 py-2 rounded-xl text-xs font-semibold border transition-colors"
               style={{
                 borderColor: theme.borderColor,
                 color: theme.textColor,
@@ -238,7 +244,7 @@ export default function AppearancePage() {
       </div>
 
       {/* Theme Presets */}
-      <div className="p-6 rounded-3xl bg-neutral-950/70 border border-neutral-800 backdrop-blur-md shadow-xl">
+      <div className="p-4 sm:p-6 rounded-3xl bg-neutral-950/70 border border-neutral-800 backdrop-blur-md shadow-xl">
         <h3 className="text-sm font-bold text-white mb-1 flex items-center gap-2">
           <Palette className="w-4 h-4 text-neutral-400" />
           <span>Preset Themes</span>
@@ -285,7 +291,7 @@ export default function AppearancePage() {
       </div>
 
       {/* Custom Theme Builder */}
-      <div className="p-6 rounded-3xl bg-neutral-950/70 border border-neutral-800 backdrop-blur-md shadow-xl space-y-6">
+      <div className="p-4 sm:p-6 rounded-3xl bg-neutral-950/70 border border-neutral-800 backdrop-blur-md shadow-xl space-y-6">
         <div>
           <h3 className="text-sm font-bold text-white flex items-center gap-2">
             <Sliders className="w-4 h-4 text-neutral-400" />
@@ -472,7 +478,7 @@ export default function AppearancePage() {
       </div>
 
       {/* Wallpaper & Video Backgrounds */}
-      <div className="p-6 rounded-3xl bg-neutral-950/70 border border-neutral-800 backdrop-blur-md shadow-xl space-y-6">
+      <div className="p-4 sm:p-6 rounded-3xl bg-neutral-950/70 border border-neutral-800 backdrop-blur-md shadow-xl space-y-6">
         <div>
           <h3 className="text-sm font-bold text-white flex items-center gap-2">
             <ImageIcon className="w-4 h-4 text-neutral-400" />
@@ -488,9 +494,9 @@ export default function AppearancePage() {
           <label className="text-xs text-neutral-400 block mb-2 font-medium">
             Curated Minimal Wallpapers
           </label>
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
             {BUILT_IN_WALLPAPERS.map((wp) => {
-              const isSelected = wallpaper.url === wp.url;
+              const isSelected = wallpaper.url === wp.url || wallpaper.url === wp.id;
               return (
                 <button
                   key={wp.id}
@@ -571,7 +577,7 @@ export default function AppearancePage() {
                       type: isYt ? "youtube" : "video",
                       url: videoUrlInput.trim(),
                     });
-                    toast.success("Video background set!");
+                    toast.success("Video background saved to profile!");
                   }
                 }}
                 className="px-3 py-1.5 bg-white text-black font-bold text-xs rounded-xl hover:bg-neutral-200"
@@ -587,16 +593,22 @@ export default function AppearancePage() {
           <div>
             <div className="flex items-center justify-between text-xs text-neutral-400 mb-2">
               <span>Darkness Overlay</span>
-              <span className="font-mono">{Math.round(wallpaper.overlayOpacity * 100)}%</span>
+              <span className="font-mono">{Math.round((wallpaper.overlayOpacity ?? 0.5) * 100)}%</span>
             </div>
             <input
               type="range"
               min="0"
               max="1"
               step="0.05"
-              value={wallpaper.overlayOpacity}
+              value={wallpaper.overlayOpacity ?? 0.5}
               onChange={(e) =>
-                handleWallpaperChange({ overlayOpacity: parseFloat(e.target.value) })
+                setWallpaper({ overlayOpacity: parseFloat(e.target.value) })
+              }
+              onPointerUp={() =>
+                handleWallpaperChange({ overlayOpacity: wallpaper.overlayOpacity })
+              }
+              onKeyUp={() =>
+                handleWallpaperChange({ overlayOpacity: wallpaper.overlayOpacity })
               }
               className="w-full h-1.5 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-white"
             />
@@ -605,16 +617,22 @@ export default function AppearancePage() {
           <div>
             <div className="flex items-center justify-between text-xs text-neutral-400 mb-2">
               <span>Background Blur</span>
-              <span className="font-mono">{wallpaper.blurAmount}px</span>
+              <span className="font-mono">{wallpaper.blurAmount || 0}px</span>
             </div>
             <input
               type="range"
               min="0"
               max="20"
               step="1"
-              value={wallpaper.blurAmount}
+              value={wallpaper.blurAmount || 0}
               onChange={(e) =>
-                handleWallpaperChange({ blurAmount: parseInt(e.target.value) })
+                setWallpaper({ blurAmount: parseInt(e.target.value) })
+              }
+              onPointerUp={() =>
+                handleWallpaperChange({ blurAmount: wallpaper.blurAmount })
+              }
+              onKeyUp={() =>
+                handleWallpaperChange({ blurAmount: wallpaper.blurAmount })
               }
               className="w-full h-1.5 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-white"
             />

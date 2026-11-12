@@ -162,6 +162,7 @@ interface ThemeState {
   setWallpaper: (newWallpaper: Partial<WallpaperConfig>) => void;
   resetTheme: () => void;
   applyCssVariables: () => void;
+  hydrateFromUser: (userTheme?: Partial<ThemeConfig>, userWallpaper?: Partial<WallpaperConfig>) => void;
 }
 
 const DEFAULT_THEME: ThemeConfig = {
@@ -211,9 +212,54 @@ export const useThemeStore = create<ThemeState>()(
       },
 
       setWallpaper: (newWallpaper) => {
-        set((state) => ({
-          wallpaper: { ...state.wallpaper, ...newWallpaper },
-        }));
+        set((state) => {
+          let resolvedUrl = newWallpaper.url !== undefined ? newWallpaper.url : state.wallpaper.url;
+          if (resolvedUrl) {
+            const match = BUILT_IN_WALLPAPERS.find((w) => w.id === resolvedUrl);
+            if (match) {
+              resolvedUrl = match.url;
+            }
+          }
+          return {
+            wallpaper: {
+              ...state.wallpaper,
+              ...newWallpaper,
+              url: resolvedUrl,
+            },
+          };
+        });
+      },
+
+      hydrateFromUser: (userTheme, userWallpaper) => {
+        set((state) => {
+          let updatedWallpaper = state.wallpaper;
+          if (userWallpaper && (userWallpaper.url || userWallpaper.type)) {
+            let resolvedUrl = userWallpaper.url || "";
+            const match = BUILT_IN_WALLPAPERS.find((w) => w.id === resolvedUrl);
+            if (match) {
+              resolvedUrl = match.url;
+            }
+            updatedWallpaper = {
+              ...state.wallpaper,
+              ...userWallpaper,
+              url: resolvedUrl || state.wallpaper.url,
+            };
+          }
+
+          let updatedTheme = state.theme;
+          if (userTheme && (userTheme.preset || userTheme.backgroundColor)) {
+            updatedTheme = {
+              ...state.theme,
+              ...userTheme,
+            };
+          }
+
+          return {
+            wallpaper: updatedWallpaper,
+            theme: updatedTheme,
+          };
+        });
+        get().applyCssVariables();
       },
 
       resetTheme: () => {
