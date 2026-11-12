@@ -7,22 +7,24 @@ interface HeatmapCalendarProps {
   userTimezone?: string;
 }
 
-export default function HeatmapCalendar({ historyMap, userTimezone = "UTC" }: HeatmapCalendarProps) {
-  const [hoveredDay, setHoveredDay] = useState<{ date: string; hours: number } | null>(null);
+export default function HeatmapCalendar({
+  historyMap = {},
+  userTimezone = "UTC",
+}: HeatmapCalendarProps) {
+  const [hoveredDay, setHoveredDay] = useState<{ date: string; seconds: number } | null>(null);
 
   // Generate 52 weeks (364 days) leading up to today
   const today = new Date();
-  const days: Array<{ dateStr: string; hours: number; dayOfWeek: number }> = [];
+  const days: Array<{ dateStr: string; seconds: number; dayOfWeek: number }> = [];
 
   for (let i = 363; i >= 0; i--) {
     const d = new Date(today.getTime() - i * 24 * 60 * 60 * 1000);
     const dateStr = d.toLocaleDateString("en-CA", { timeZone: userTimezone });
     const seconds = historyMap[dateStr] || 0;
-    const hours = Number((seconds / 3600).toFixed(1));
     days.push({
       dateStr,
-      hours,
-      dayOfWeek: d.getDay(), // 0 = Sun, 6 = Sat
+      seconds,
+      dayOfWeek: d.getDay(),
     });
   }
 
@@ -32,12 +34,21 @@ export default function HeatmapCalendar({ historyMap, userTimezone = "UTC" }: He
     weeks.push(days.slice(i, i + 7));
   }
 
-  const getColor = (hours: number) => {
-    if (hours === 0) return "bg-neutral-900 border-neutral-800/80";
-    if (hours < 1) return "bg-neutral-700 border-neutral-600";
-    if (hours < 2.5) return "bg-neutral-500 border-neutral-400";
-    if (hours < 4) return "bg-neutral-300 border-neutral-200";
-    return "bg-white border-white";
+  const getColor = (seconds: number) => {
+    if (seconds <= 0) return "bg-neutral-900 border-neutral-800/80";
+    if (seconds < 1800) return "bg-neutral-700 border-neutral-600"; // < 30 mins
+    if (seconds < 5400) return "bg-neutral-500 border-neutral-400"; // 30m - 1.5 hrs
+    if (seconds < 10800) return "bg-neutral-300 border-neutral-200"; // 1.5h - 3 hrs
+    return "bg-white border-white"; // 3+ hrs
+  };
+
+  const formatStudyTime = (seconds: number) => {
+    if (seconds <= 0) return "0 min";
+    if (seconds < 60) return `${seconds}s`;
+    const mins = Math.round(seconds / 60);
+    if (mins < 60) return `${mins} min`;
+    const hrs = (seconds / 3600).toFixed(1);
+    return `${hrs}h (${mins}m)`;
   };
 
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -59,11 +70,12 @@ export default function HeatmapCalendar({ historyMap, userTimezone = "UTC" }: He
               {week.map((day) => (
                 <div
                   key={day.dateStr}
-                  onMouseEnter={() => setHoveredDay({ date: day.dateStr, hours: day.hours })}
+                  onMouseEnter={() => setHoveredDay({ date: day.dateStr, seconds: day.seconds })}
                   onMouseLeave={() => setHoveredDay(null)}
                   className={`w-3 h-3 rounded-[3px] border transition-transform hover:scale-125 cursor-pointer ${getColor(
-                    day.hours
+                    day.seconds
                   )}`}
+                  title={`${day.dateStr}: ${formatStudyTime(day.seconds)}`}
                 />
               ))}
             </div>
@@ -75,7 +87,7 @@ export default function HeatmapCalendar({ historyMap, userTimezone = "UTC" }: He
           <div>
             {hoveredDay ? (
               <span className="text-white font-mono">
-                {hoveredDay.date}: <span className="font-bold">{hoveredDay.hours} hrs</span>
+                {hoveredDay.date}: <span className="font-bold text-white">{formatStudyTime(hoveredDay.seconds)}</span>
               </span>
             ) : (
               <span className="text-neutral-500">Hover over any day to view study hours</span>
@@ -84,11 +96,11 @@ export default function HeatmapCalendar({ historyMap, userTimezone = "UTC" }: He
 
           <div className="flex items-center gap-1.5 text-neutral-500">
             <span>Less</span>
-            <div className="w-2.5 h-2.5 rounded-[2px] bg-neutral-900 border border-neutral-800" />
-            <div className="w-2.5 h-2.5 rounded-[2px] bg-neutral-700" />
-            <div className="w-2.5 h-2.5 rounded-[2px] bg-neutral-500" />
-            <div className="w-2.5 h-2.5 rounded-[2px] bg-neutral-300" />
-            <div className="w-2.5 h-2.5 rounded-[2px] bg-white" />
+            <div className="w-2.5 h-2.5 rounded-[2px] bg-neutral-900 border border-neutral-800" title="0 min" />
+            <div className="w-2.5 h-2.5 rounded-[2px] bg-neutral-700" title="< 30 min" />
+            <div className="w-2.5 h-2.5 rounded-[2px] bg-neutral-500" title="30 min - 1.5 hrs" />
+            <div className="w-2.5 h-2.5 rounded-[2px] bg-neutral-300" title="1.5 hrs - 3 hrs" />
+            <div className="w-2.5 h-2.5 rounded-[2px] bg-white" title="3+ hrs" />
             <span>More</span>
           </div>
         </div>
@@ -96,4 +108,3 @@ export default function HeatmapCalendar({ historyMap, userTimezone = "UTC" }: He
     </div>
   );
 }
-

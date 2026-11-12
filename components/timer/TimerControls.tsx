@@ -9,7 +9,7 @@ interface TimerControlsProps {
   canSave?: boolean;
 }
 
-export default function TimerControls({ onSaveSession }: TimerControlsProps) {
+function TimerControls({ onSaveSession }: TimerControlsProps) {
   const {
     isRunning,
     start,
@@ -106,3 +106,5 @@ export default function TimerControls({ onSaveSession }: TimerControlsProps) {
     </div>
   );
 }
+
+export default React.memo(TimerControls);

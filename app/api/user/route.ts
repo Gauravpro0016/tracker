@@ -40,15 +40,47 @@ export async function PATCH(req: NextRequest) {
 
     const body = await req.json();
 
-    if (body.name !== undefined) user.name = body.name;
+    if (body.name !== undefined) user.name = body.name.trim();
+    if (body.username !== undefined) {
+      const cleanUsername = body.username.toLowerCase().trim();
+      if (cleanUsername && cleanUsername !== user.username) {
+        const existing = await User.findOne({ username: cleanUsername });
+        if (!existing) {
+          user.username = cleanUsername;
+        }
+      }
+    }
     if (body.bio !== undefined) user.bio = body.bio;
     if (body.avatar !== undefined) user.avatar = body.avatar;
     if (body.timezone !== undefined) user.timezone = body.timezone;
     if (body.educationLevel !== undefined) user.educationLevel = body.educationLevel;
     if (body.targetExam !== undefined) user.targetExam = body.targetExam;
-    if (body.theme !== undefined) user.theme = { ...user.theme, ...body.theme };
-    if (body.wallpaper !== undefined) user.wallpaper = { ...user.wallpaper, ...body.wallpaper };
-    if (body.settings !== undefined) user.settings = { ...user.settings, ...body.settings };
+
+    if (body.theme !== undefined) {
+      user.theme = { ...(user.theme || {}), ...body.theme };
+      user.markModified("theme");
+    }
+
+    if (body.wallpaper !== undefined) {
+      user.wallpaper = { ...(user.wallpaper || {}), ...body.wallpaper };
+      user.markModified("wallpaper");
+    }
+
+    if (body.settings !== undefined) {
+      user.settings = {
+        ...(user.settings || {}),
+        ...body.settings,
+        pomodoro: {
+          ...(user.settings?.pomodoro || {}),
+          ...(body.settings?.pomodoro || {}),
+        },
+        sound: {
+          ...(user.settings?.sound || {}),
+          ...(body.settings?.sound || {}),
+        },
+      };
+      user.markModified("settings");
+    }
 
     await user.save();
 

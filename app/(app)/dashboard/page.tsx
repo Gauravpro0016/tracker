@@ -27,6 +27,7 @@ import {
 } from "recharts";
 import { formatTime, formatDurationHuman } from "@/lib/utils";
 import { getStorageItem } from "@/lib/storage";
+import { calculateStreaks } from "@/lib/streak";
 
 const STUDY_QUOTES = [
   { quote: "Focus is a muscle. The more you practice, the easier it gets.", author: "Cal Newport" },
@@ -37,7 +38,7 @@ const STUDY_QUOTES = [
 ];
 
 export default function DashboardPage() {
-  const { data: session } = useSession();
+  const { data: session, status: authStatus } = useSession();
 
   // Quote of the day (based on day of year)
   const dayOfYear = Math.floor(
@@ -47,22 +48,26 @@ export default function DashboardPage() {
 
   // Fetch Analytics & Streaks
   const { data: analytics } = useQuery({
-    queryKey: ["analytics", "week"],
+    queryKey: ["analytics", "week", session?.user?.email || (authStatus === "loading" ? "loading" : "guest")],
+    enabled: authStatus !== "loading",
     queryFn: async () => {
       if (!session?.user) {
-        // Fallback for guest mode from localStorage
+        // Fallback for guest mode from localStorage using real streak calculator
         const localSessions = getStorageItem<any[]>("focusdesk-guest-sessions", []);
+        const streakInfo = calculateStreaks(localSessions);
         const todayStr = new Date().toISOString().split("T")[0];
-        const todaySeconds = localSessions
-          .filter((s: any) => s.startedAt?.startsWith(todayStr))
-          .reduce((sum: number, s: any) => sum + (s.durationSeconds || 0), 0);
+        const totalSeconds = localSessions.reduce((sum: number, s: any) => sum + (s.durationSeconds || 0), 0);
+        const todayHours = Number(((streakInfo.todayStudiedSeconds || 0) / 3600).toFixed(1));
         return {
-          streak: { currentStreak: todaySeconds > 900 ? 1 : 0, longestStreak: 1, totalStudyDays: 1 },
-          stats: { totalHours: Number((todaySeconds / 3600).toFixed(1)), thisWeekHours: Number((todaySeconds / 3600).toFixed(1)) },
+          streak: streakInfo,
+          stats: {
+            totalHours: Number((totalSeconds / 3600).toFixed(1)),
+            thisWeekHours: Number((totalSeconds / 3600).toFixed(1)),
+          },
           dailyData: [
             { date: "Mon", hours: 0 },
             { date: "Tue", hours: 0 },
-            { date: "Wed", hours: Number((todaySeconds / 3600).toFixed(1)) },
+            { date: "Wed", hours: todayHours },
             { date: "Thu", hours: 0 },
             { date: "Fri", hours: 0 },
             { date: "Sat", hours: 0 },

@@ -17,7 +17,7 @@ interface ManualSessionModalProps {
   subjects: Subject[];
 }
 
-export default function ManualSessionModal({ subjects }: ManualSessionModalProps) {
+function ManualSessionModal({ subjects }: ManualSessionModalProps) {
   const [isOpen, setIsOpen] = useState(false);
   const { data: session } = useSession();
   const queryClient = useQueryClient();
@@ -201,4 +201,6 @@ export default function ManualSessionModal({ subjects }: ManualSessionModalProps
     </>
   );
 }
+
+export default React.memo(ManualSessionModal);
 

@@ -9,7 +9,15 @@ import "@/models/Habit";
 import "@/models/HabitLog";
 import "@/models/Goal";
 
-const MONGODB_URI = process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/focusdesk";
+const uri = process.env.MONGODB_URI;
+
+if (!uri) {
+  throw new Error(
+    "Please define the MONGODB_URI environment variable inside .env.local or your production deployment settings."
+  );
+}
+
+const MONGODB_URI: string = uri;
 
 interface MongooseCache {
   conn: typeof mongoose | null;
@@ -28,7 +36,8 @@ if (!global.mongoose) {
 }
 
 export async function connectToDatabase(): Promise<typeof mongoose> {
-  if (cached.conn) {
+  // If already connected and ready, return existing connection
+  if (cached.conn && mongoose.connection.readyState === 1) {
     return cached.conn;
   }
 
@@ -37,6 +46,8 @@ export async function connectToDatabase(): Promise<typeof mongoose> {
       bufferCommands: false,
       maxPoolSize: 10,
       serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000,
+      autoIndex: process.env.NODE_ENV !== "production",
     };
 
     cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongooseInstance) => {

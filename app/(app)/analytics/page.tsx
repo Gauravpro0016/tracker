@@ -30,45 +30,43 @@ import {
 import HeatmapCalendar from "@/components/analytics/HeatmapCalendar";
 import { formatDurationHuman } from "@/lib/utils";
 import { getStorageItem } from "@/lib/storage";
+import { calculateStreaks } from "@/lib/streak";
 
 export default function AnalyticsPage() {
-  const { data: session } = useSession();
+  const { data: session, status: authStatus } = useSession();
   const [range, setRange] = useState<"today" | "week" | "month" | "year">("week");
 
   const { data: analytics, isLoading } = useQuery({
-    queryKey: ["analytics", range],
+    queryKey: ["analytics", range, session?.user?.email || (authStatus === "loading" ? "loading" : "guest")],
+    enabled: authStatus !== "loading",
     queryFn: async () => {
       if (!session?.user) {
-        // Guest mode fallback using local sessions
+        // Guest mode fallback using local sessions and real streak calculation
         const local = getStorageItem<any[]>("focusdesk-guest-sessions", []);
-        const history: Record<string, number> = {};
-        let total = 0;
-        local.forEach((s: any) => {
-          const d = s.startedAt ? s.startedAt.split("T")[0] : "2026-11-11";
-          history[d] = (history[d] || 0) + (s.durationSeconds || 0);
-          total += s.durationSeconds || 0;
-        });
+        const streakInfo = calculateStreaks(local);
+        const total = local.reduce((sum: number, s: any) => sum + (s.durationSeconds || 0), 0);
+        const history = streakInfo.historyMap || {};
 
         const todayStr = new Date().toISOString().split("T")[0];
-        const daysArray = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day, i) => ({
+        const daysArray = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => ({
           date: day,
-          hours: Number(((history[todayStr] || 3600) / 3600).toFixed(1)),
-          sessions: local.length || 1,
+          hours: Number(((history[todayStr] || 0) / 3600).toFixed(1)),
+          sessions: local.length || 0,
         }));
 
         return {
           range,
-          streak: { currentStreak: 1, longestStreak: 2, totalStudyDays: 1, historyMap: history },
+          streak: streakInfo,
           stats: {
             totalHours: Number((total / 3600).toFixed(1)),
             totalSessions: local.length,
-            averageHoursPerDay: 1.5,
-            bestDay: { date: todayStr, hours: 2.5 },
-            longestSessionSeconds: 3600,
-            topSubject: { name: "Deep Work", hours: 2 },
-            thisWeekHours: 5,
-            lastWeekHours: 4,
-            weekPercentChange: 25,
+            averageHoursPerDay: Number(((total / 3600) / Math.max(1, streakInfo.totalStudyDays)).toFixed(1)),
+            bestDay: { date: todayStr, hours: Number(((streakInfo.todayStudiedSeconds || 0) / 3600).toFixed(1)) },
+            longestSessionSeconds: local.reduce((max: number, s: any) => Math.max(max, s.durationSeconds || 0), 0),
+            topSubject: { name: "Focus Study", hours: Number((total / 3600).toFixed(1)) },
+            thisWeekHours: Number((total / 3600).toFixed(1)),
+            lastWeekHours: 0,
+            weekPercentChange: 0,
           },
           dailyData: daysArray,
           subjectData: [

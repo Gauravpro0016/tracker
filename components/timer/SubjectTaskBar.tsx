@@ -22,7 +22,7 @@ const DEFAULT_GUEST_SUBJECTS: Subject[] = [
   { id: "sub-4", name: "Math", color: "#f59e0b" },
 ];
 
-export default function SubjectTaskBar() {
+function SubjectTaskBar() {
   const { data: session } = useSession();
   const queryClient = useQueryClient();
   const { currentSubjectId, setSubjectId, currentTask, setTask } = useTimerStore();
@@ -42,6 +42,7 @@ export default function SubjectTaskBar() {
       return res.json();
     },
     enabled: !!session?.user,
+    staleTime: 5 * 60 * 1000,
   });
 
   const [localSubjects, setLocalSubjects] = useState<Subject[]>(DEFAULT_GUEST_SUBJECTS);
@@ -270,4 +271,6 @@ export default function SubjectTaskBar() {
     </div>
   );
 }
+
+export default React.memo(SubjectTaskBar);
 

@@ -1,17 +1,29 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useSession } from "next-auth/react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import AppSidebar from "@/components/layout/AppSidebar";
 import AppHeader from "@/components/layout/AppHeader";
 import WallpaperBackground from "@/components/layout/WallpaperBackground";
 import { useTimerStore } from "@/store/timerStore";
-import { saveStudySession } from "@/lib/save-session";
+import { saveStudySession, syncGuestSessionsToServer } from "@/lib/save-session";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
+  const { data: session } = useSession();
   const queryClient = useQueryClient();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { isRunning, start, pause, reset, isFullscreen, setIsFullscreen, setOnSessionSave } = useTimerStore();
+  const {
+    isRunning,
+    start,
+    pause,
+    reset,
+    isFullscreen,
+    setIsFullscreen,
+    setOnSessionSave,
+    setPomodoroConfig,
+    setSoundConfig,
+  } = useTimerStore();
 
   // Automatically save study session when timer is reset or completed
   useEffect(() => {
@@ -22,6 +34,36 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       setOnSessionSave(undefined);
     };
   }, [setOnSessionSave, queryClient]);
+
+  // Upload any guest sessions accumulated offline once user is logged in
+  useEffect(() => {
+    if (session?.user) {
+      syncGuestSessionsToServer(queryClient);
+    }
+  }, [session?.user, queryClient]);
+
+  // Sync saved user Pomodoro & Sound settings from MongoDB when logged in
+  const { data: userProfile } = useQuery({
+    queryKey: ["userProfile", session?.user?.email],
+    queryFn: async () => {
+      const res = await fetch("/api/user");
+      if (!res.ok) return null;
+      return res.json();
+    },
+    enabled: !!session?.user,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  useEffect(() => {
+    if (userProfile?.settings) {
+      if (userProfile.settings.pomodoro) {
+        setPomodoroConfig(userProfile.settings.pomodoro);
+      }
+      if (userProfile.settings.sound) {
+        setSoundConfig(userProfile.settings.sound);
+      }
+    }
+  }, [userProfile, setPomodoroConfig, setSoundConfig]);
 
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {

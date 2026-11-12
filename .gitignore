@@ -46,3 +46,4 @@ Thumbs.db
 *.sublime-workspace
 *.swp
 *.swo
+.env.example

@@ -26,7 +26,7 @@ export default function AppProviders({ children }: { children: React.ReactNode }
   }, [applyCssVariables]);
 
   return (
-    <SessionProvider>
+    <SessionProvider refetchOnWindowFocus={false} refetchInterval={0}>
       <QueryClientProvider client={queryClient}>
         {children}
         <Toaster

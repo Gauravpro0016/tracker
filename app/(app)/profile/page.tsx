@@ -22,6 +22,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatTime } from "@/lib/utils";
+import { getStorageItem } from "@/lib/storage";
+import { calculateStreaks } from "@/lib/streak";
 
 export default function ProfilePage() {
   const { data: session, update: updateSession } = useSession();
@@ -66,12 +68,15 @@ export default function ProfilePage() {
 
   // Query User Stats
   const { data: analytics } = useQuery({
-    queryKey: ["analytics", "year"],
+    queryKey: ["analytics", "year", session?.user?.email || "guest"],
     queryFn: async () => {
       if (!session?.user) {
+        const local = getStorageItem<any[]>("focusdesk-guest-sessions", []);
+        const streakInfo = calculateStreaks(local);
+        const totalSecs = local.reduce((sum: number, s: any) => sum + (s.durationSeconds || 0), 0);
         return {
-          streak: { currentStreak: 1, longestStreak: 1, totalStudyDays: 1 },
-          stats: { totalHours: 2.5 },
+          streak: streakInfo,
+          stats: { totalHours: Number((totalSecs / 3600).toFixed(1)) },
         };
       }
       const res = await fetch("/api/analytics?range=year");

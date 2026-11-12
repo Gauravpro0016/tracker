@@ -1,11 +1,16 @@
 "use client";
 
-import React, { useState } from "react";
-import { Settings, X, Volume2 } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Settings, X, Volume2, VolumeX } from "lucide-react";
+import { useSession } from "next-auth/react";
+import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { useTimerStore } from "@/store/timerStore";
 import { playSound } from "@/lib/sound";
 
-export default function PomodoroSettingsModal() {
+function PomodoroSettingsModal() {
+  const { data: session } = useSession();
+  const queryClient = useQueryClient();
   const [isOpen, setIsOpen] = useState(false);
   const { pomodoroConfig, setPomodoroConfig, soundConfig, setSoundConfig } = useTimerStore();
 
@@ -20,21 +25,62 @@ export default function PomodoroSettingsModal() {
   const [volume, setVolume] = useState(soundConfig.volume);
   const [soundEnabled, setSoundEnabled] = useState(soundConfig.enabled);
 
-  const handleSave = (e: React.FormEvent) => {
+  // Synchronize modal state with store whenever opened
+  useEffect(() => {
+    if (isOpen) {
+      setFocus(pomodoroConfig.focusMinutes);
+      setShortBreak(pomodoroConfig.shortBreakMinutes);
+      setLongBreak(pomodoroConfig.longBreakMinutes);
+      setInterval(pomodoroConfig.sessionsBeforeLongBreak);
+      setAutoBreaks(Boolean(pomodoroConfig.autoStartBreaks));
+      setAutoFocus(Boolean(pomodoroConfig.autoStartFocus));
+      setSoundType(soundConfig.soundType);
+      setVolume(soundConfig.volume);
+      setSoundEnabled(Boolean(soundConfig.enabled));
+    }
+  }, [isOpen, pomodoroConfig, soundConfig]);
+
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    setPomodoroConfig({
+    const newPomodoro = {
       focusMinutes: Number(focus),
       shortBreakMinutes: Number(shortBreak),
       longBreakMinutes: Number(longBreak),
       sessionsBeforeLongBreak: Number(interval),
-      autoStartBreaks: autoBreaks,
-      autoStartFocus: autoFocus,
-    });
-    setSoundConfig({
+      autoStartBreaks: Boolean(autoBreaks),
+      autoStartFocus: Boolean(autoFocus),
+    };
+    const newSound = {
       soundType,
-      volume,
-      enabled: soundEnabled,
-    });
+      volume: Number(volume),
+      enabled: Boolean(soundEnabled),
+    };
+
+    setPomodoroConfig(newPomodoro);
+    setSoundConfig(newSound);
+
+    // Save to user account in MongoDB if logged in
+    if (session?.user) {
+      try {
+        const res = await fetch("/api/user", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            settings: {
+              pomodoro: newPomodoro,
+              sound: newSound,
+            },
+          }),
+        });
+        if (res.ok) {
+          queryClient.invalidateQueries({ queryKey: ["userProfile"] });
+        }
+      } catch (err) {
+        console.error("Failed to sync settings:", err);
+      }
+    }
+
+    toast.success("Timer settings saved!");
     setIsOpen(false);
   };
 
@@ -124,22 +170,28 @@ export default function PomodoroSettingsModal() {
 
               {/* Automation Toggles */}
               <div className="pt-2 border-t border-neutral-800/80 space-y-2">
-                <label className="flex items-center justify-between text-xs cursor-pointer select-none">
-                  <span className="text-neutral-300">Auto-start Breaks</span>
+                <label className="flex items-center justify-between text-xs cursor-pointer select-none py-1">
+                  <div>
+                    <span className="text-neutral-200 font-medium block">Auto-start Breaks</span>
+                    <span className="text-[11px] text-neutral-500">Automatically start break timer when focus completes</span>
+                  </div>
                   <input
                     type="checkbox"
                     checked={autoBreaks}
                     onChange={(e) => setAutoBreaks(e.target.checked)}
-                    className="w-4 h-4 rounded border-neutral-800 bg-neutral-900 accent-white cursor-pointer"
+                    className="w-4 h-4 rounded border-neutral-800 bg-neutral-900 accent-white cursor-pointer ml-3"
                   />
                 </label>
-                <label className="flex items-center justify-between text-xs cursor-pointer select-none">
-                  <span className="text-neutral-300">Auto-start Next Focus Session</span>
+                <label className="flex items-center justify-between text-xs cursor-pointer select-none py-1">
+                  <div>
+                    <span className="text-neutral-200 font-medium block">Auto-start Next Focus Session</span>
+                    <span className="text-[11px] text-neutral-500">Automatically begin next study session when break finishes</span>
+                  </div>
                   <input
                     type="checkbox"
                     checked={autoFocus}
                     onChange={(e) => setAutoFocus(e.target.checked)}
-                    className="w-4 h-4 rounded border-neutral-800 bg-neutral-900 accent-white cursor-pointer"
+                    className="w-4 h-4 rounded border-neutral-800 bg-neutral-900 accent-white cursor-pointer ml-3"
                   />
                 </label>
               </div>
@@ -148,15 +200,27 @@ export default function PomodoroSettingsModal() {
               <div className="pt-3 border-t border-neutral-800/80 space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-semibold text-neutral-300 flex items-center gap-1.5">
-                    <Volume2 className="w-3.5 h-3.5" /> Alarm Sound
+                    {soundEnabled ? <Volume2 className="w-3.5 h-3.5 text-white" /> : <VolumeX className="w-3.5 h-3.5 text-neutral-500" />}
+                    Alarm Sound
                   </span>
-                  <button
-                    type="button"
-                    onClick={testAudio}
-                    className="text-xs text-neutral-400 hover:text-white underline underline-offset-4"
-                  >
-                    Test Sound
-                  </button>
+                  <div className="flex items-center gap-3">
+                    <label className="flex items-center gap-1.5 text-xs text-neutral-400 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={soundEnabled}
+                        onChange={(e) => setSoundEnabled(e.target.checked)}
+                        className="w-3.5 h-3.5 rounded border-neutral-800 bg-neutral-900 accent-white cursor-pointer"
+                      />
+                      <span>Sound On</span>
+                    </label>
+                    <button
+                      type="button"
+                      onClick={testAudio}
+                      className="text-xs text-neutral-400 hover:text-white underline underline-offset-4"
+                    >
+                      Test
+                    </button>
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-4 gap-1.5">
@@ -219,3 +283,4 @@ export default function PomodoroSettingsModal() {
   );
 }
 
+export default React.memo(PomodoroSettingsModal);

@@ -334,6 +334,17 @@ export const useTimerStore = create<TimerState>()(
             };
           }
 
+          if (sessionDataToSave) {
+            const onSave = get().onSessionSave;
+            if (onSave) {
+              try {
+                onSave(sessionDataToSave);
+              } catch (err) {
+                console.error("Error saving session on timer complete:", err);
+              }
+            }
+          }
+
           if (mode === "pomodoro") {
             if (pomodoroPhase === "focus") {
               const nextCycle = cycleCount + 1;
@@ -353,7 +364,7 @@ export const useTimerStore = create<TimerState>()(
                 targetSeconds: nextDuration,
                 accumulatedSeconds: 0,
                 startTime: pomodoroConfig.autoStartBreaks ? Date.now() : null,
-                isRunning: pomodoroConfig.autoStartBreaks,
+                isRunning: Boolean(pomodoroConfig.autoStartBreaks),
                 sessionStartedAt: null,
               });
             } else {
@@ -371,8 +382,8 @@ export const useTimerStore = create<TimerState>()(
                 targetSeconds: nextDuration,
                 accumulatedSeconds: 0,
                 startTime: pomodoroConfig.autoStartFocus ? Date.now() : null,
-                isRunning: pomodoroConfig.autoStartFocus,
-                sessionStartedAt: null,
+                isRunning: Boolean(pomodoroConfig.autoStartFocus),
+                sessionStartedAt: pomodoroConfig.autoStartFocus ? new Date().toISOString() : null,
               });
             }
           } else {

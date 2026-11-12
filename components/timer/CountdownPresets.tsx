@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useTimerStore } from "@/store/timerStore";
 
-export default function CountdownPresets() {
+function CountdownPresets() {
   const { setTargetSeconds, targetSeconds, isRunning } = useTimerStore();
   const [showCustom, setShowCustom] = useState(false);
   const [customHours, setCustomHours] = useState(0);
@@ -113,4 +113,6 @@ export default function CountdownPresets() {
     </div>
   );
 }
+
+export default React.memo(CountdownPresets);
 

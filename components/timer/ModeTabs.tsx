@@ -4,7 +4,7 @@ import React from "react";
 import { Timer, Clock, Flame } from "lucide-react";
 import { useTimerStore, TimerMode } from "@/store/timerStore";
 
-export default function ModeTabs() {
+function ModeTabs() {
   const { mode, setMode } = useTimerStore();
 
   const tabs: { key: TimerMode; label: string; icon: any }[] = [
@@ -37,4 +37,6 @@ export default function ModeTabs() {
     </div>
   );
 }
+
+export default React.memo(ModeTabs);
 

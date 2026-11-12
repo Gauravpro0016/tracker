@@ -37,39 +37,40 @@ export function calculateStreaks(
   const todayStudiedSeconds = historyMap[todayStr] || 0;
   const todayQualified = todayStudiedSeconds >= dailyMinimumSeconds;
 
-  // Filter qualifying dates
-  const qualifyingDates = Object.keys(historyMap)
-    .filter((dateStr) => historyMap[dateStr] >= dailyMinimumSeconds)
+  // Active study dates: any day where user logged at least 5 seconds of focus
+  const studyDates = Object.keys(historyMap)
+    .filter((dateStr) => historyMap[dateStr] >= 5)
     .sort(); // ascending order: e.g. "2026-11-01", "2026-11-02"
 
-  const qualifyingSet = new Set(qualifyingDates);
-  const totalStudyDays = qualifyingDates.length;
+  const studySet = new Set(studyDates);
+  const totalStudyDays = studyDates.length;
 
-  // Calculate current streak
+  const hasStudiedToday = studySet.has(todayStr);
+  const hasStudiedYesterday = studySet.has(yesterdayStr);
+
   let currentStreak = 0;
-  let checkDate = new Date(now);
 
-  // If today is qualified, start from today. If not, check if yesterday was qualified
-  if (todayQualified) {
+  if (hasStudiedToday) {
+    // Today counts towards active streak!
     currentStreak = 1;
-    // Check backwards from yesterday
-    let prev = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    // Walk back day by day from yesterday
+    let prev = new Date(yesterdayDate);
     while (true) {
       const prevStr = prev.toLocaleDateString("en-CA", { timeZone: userTimezone });
-      if (qualifyingSet.has(prevStr)) {
+      if (studySet.has(prevStr)) {
         currentStreak++;
         prev = new Date(prev.getTime() - 24 * 60 * 60 * 1000);
       } else {
         break;
       }
     }
-  } else if (qualifyingSet.has(yesterdayStr)) {
-    // Yesterday was qualified, streak is still active today
+  } else if (hasStudiedYesterday) {
+    // Yesterday was a study day, today is currently in progress (grace period)
     currentStreak = 1;
     let prev = new Date(yesterdayDate.getTime() - 24 * 60 * 60 * 1000);
     while (true) {
       const prevStr = prev.toLocaleDateString("en-CA", { timeZone: userTimezone });
-      if (qualifyingSet.has(prevStr)) {
+      if (studySet.has(prevStr)) {
         currentStreak++;
         prev = new Date(prev.getTime() - 24 * 60 * 60 * 1000);
       } else {
@@ -78,15 +79,15 @@ export function calculateStreaks(
     }
   }
 
-  // Calculate longest streak
+  // Calculate longest streak across history
   let longestStreak = 0;
-  if (qualifyingDates.length > 0) {
+  if (studyDates.length > 0) {
     let currentRun = 1;
     longestStreak = 1;
 
-    for (let i = 1; i < qualifyingDates.length; i++) {
-      const prevDate = new Date(qualifyingDates[i - 1]);
-      const currDate = new Date(qualifyingDates[i]);
+    for (let i = 1; i < studyDates.length; i++) {
+      const prevDate = new Date(studyDates[i - 1] + "T00:00:00Z");
+      const currDate = new Date(studyDates[i] + "T00:00:00Z");
       const diffDays = Math.round((currDate.getTime() - prevDate.getTime()) / (1000 * 60 * 60 * 24));
 
       if (diffDays === 1) {
@@ -100,6 +101,10 @@ export function calculateStreaks(
     }
   }
 
+  if (currentStreak > longestStreak) {
+    longestStreak = currentStreak;
+  }
+
   return {
     currentStreak,
     longestStreak,
@@ -110,4 +115,3 @@ export function calculateStreaks(
     historyMap,
   };
 }
-

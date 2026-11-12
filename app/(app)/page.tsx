@@ -58,12 +58,8 @@ export default function TimerPage() {
     if (!isRunning) return;
 
     const intervalId = setInterval(() => {
-      const result = tick();
+      tick();
       setTickCounter((c) => c + 1);
-
-      if (result.finished && result.sessionData) {
-        saveSessionRef.current(result.sessionData);
-      }
     }, 500);
 
     return () => clearInterval(intervalId);
@@ -104,6 +100,7 @@ export default function TimerPage() {
       return res.json();
     },
     enabled: !!session?.user,
+    staleTime: 5 * 60 * 1000,
   });
 
   const activeSubject = serverSubjects.find((s: any) => s._id === currentSubjectId);

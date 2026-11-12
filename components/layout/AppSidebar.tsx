@@ -29,7 +29,7 @@ interface SidebarProps {
   setMobileOpen: (open: boolean) => void;
 }
 
-export default function AppSidebar({ mobileOpen, setMobileOpen }: SidebarProps) {
+function AppSidebar({ mobileOpen, setMobileOpen }: SidebarProps) {
   const pathname = usePathname();
   const { data: session } = useSession();
   const [collapsed, setCollapsed] = useState(false);
@@ -243,4 +243,8 @@ export default function AppSidebar({ mobileOpen, setMobileOpen }: SidebarProps) 
     </>
   );
 }
+
+const MemoizedAppSidebar = React.memo(AppSidebar);
+export { MemoizedAppSidebar as AppSidebar };
+export default MemoizedAppSidebar;
 

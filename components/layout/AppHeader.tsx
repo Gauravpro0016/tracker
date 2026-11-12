@@ -8,6 +8,7 @@ import { Menu, Maximize, Flame, Play, Pause } from "lucide-react";
 import { useTimerStore } from "@/store/timerStore";
 import { formatTime } from "@/lib/utils";
 import { getStorageItem } from "@/lib/storage";
+import { calculateStreaks } from "@/lib/streak";
 import AmbientAudioControl from "./AmbientAudioControl";
 
 interface HeaderProps {
@@ -16,21 +17,26 @@ interface HeaderProps {
 }
 
 export default function AppHeader({ setMobileOpen, toggleFullscreen }: HeaderProps) {
-  const { data: session } = useSession();
+  const { data: session, status: authStatus } = useSession();
   const { isRunning, mode, secondsLeft, accumulatedSeconds, startTime, pause, resume } = useTimerStore();
 
-  // Live streak query
+  // Live streak query (updates immediately upon session save, authenticated or guest)
   const { data: analytics } = useQuery({
-    queryKey: ["streak"],
+    queryKey: ["streak", session?.user?.email || (authStatus === "loading" ? "loading" : "guest")],
     queryFn: async () => {
+      if (authStatus === "loading") {
+        return { streak: { currentStreak: 0 } };
+      }
       if (!session?.user) {
         const local = getStorageItem<any[]>("focusdesk-guest-sessions", []);
-        return { streak: { currentStreak: local.length > 0 ? 1 : 0 } };
+        const streakInfo = calculateStreaks(local);
+        return { streak: streakInfo };
       }
       const res = await fetch("/api/analytics?range=week");
       if (!res.ok) return { streak: { currentStreak: 0 } };
       return res.json();
     },
+    staleTime: 30 * 1000,
   });
 
   const currentStreak = analytics?.streak?.currentStreak || 0;

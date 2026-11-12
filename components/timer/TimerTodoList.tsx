@@ -14,7 +14,7 @@ interface TodoTask {
   completed: boolean;
 }
 
-export default function TimerTodoList() {
+function TimerTodoList() {
   const { data: session } = useSession();
   const queryClient = useQueryClient();
   const [inputText, setInputText] = useState("");
@@ -46,6 +46,7 @@ export default function TimerTodoList() {
       return res.json();
     },
     enabled: !!session?.user,
+    staleTime: 60 * 1000,
   });
 
   const tasks = session?.user ? serverTasks : localTasks;
@@ -206,4 +207,6 @@ export default function TimerTodoList() {
     </div>
   );
 }
+
+export default React.memo(TimerTodoList);
 
