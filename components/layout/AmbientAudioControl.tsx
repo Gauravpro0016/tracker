@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import { ambientSound } from "@/lib/ambient";
-import { Volume2, VolumeX, CloudRain, Wind, Music, Sparkles } from "lucide-react";
+import { Volume2, VolumeX, CloudRain, Wind, Music, Sparkles, Headphones } from "lucide-react";
+import { useMusicStore } from "@/store/musicStore";
 
 export default function AmbientAudioControl() {
   const [isOpen, setIsOpen] = useState(false);
@@ -125,6 +126,19 @@ export default function AmbientAudioControl() {
               />
             </div>
           )}
+
+          <div className="pt-2.5 border-t border-neutral-800/80 mt-2.5">
+            <button
+              onClick={() => {
+                setIsOpen(false);
+                useMusicStore.getState().setWidgetOpen(true);
+              }}
+              className="w-full py-2 px-3 rounded-xl bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 hover:border-neutral-700 text-xs text-neutral-300 hover:text-white flex items-center justify-center gap-1.5 transition-colors font-medium"
+            >
+              <Headphones className="w-3.5 h-3.5 text-amber-400" />
+              <span>Spotify & YouTube Music</span>
+            </button>
+          </div>
         </div>
       )}
     </div>

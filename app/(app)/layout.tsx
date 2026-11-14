@@ -6,6 +6,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import AppSidebar from "@/components/layout/AppSidebar";
 import AppHeader from "@/components/layout/AppHeader";
 import WallpaperBackground from "@/components/layout/WallpaperBackground";
+import MusicPlayerDock from "@/components/music/MusicPlayerDock";
 import { useTimerStore } from "@/store/timerStore";
 import { useThemeStore } from "@/store/themeStore";
 import { saveStudySession, syncGuestSessionsToServer } from "@/lib/save-session";
@@ -195,6 +196,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           </main>
         </div>
       </div>
+
+      {/* Floating High-Performance Music Player (Spotify & YouTube) */}
+      <MusicPlayerDock />
     </div>
   );
 }
