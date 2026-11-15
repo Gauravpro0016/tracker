@@ -39,12 +39,12 @@ function TimerControls({ onSaveSession }: TimerControlsProps) {
   };
 
   return (
-    <div className="flex flex-col items-center gap-3">
-      <div className="flex items-center gap-2.5 sm:gap-4">
+    <div className="flex flex-col items-center gap-1.5 sm:gap-3 shrink-0">
+      <div className="flex items-center gap-2 sm:gap-4 max-w-full justify-center">
         {/* Reset Button */}
         <button
           onClick={() => reset()}
-          className="p-3.5 sm:px-5 sm:py-3.5 rounded-2xl bg-neutral-900/80 hover:bg-neutral-800 text-neutral-300 hover:text-white border border-neutral-800 transition-all active:scale-95 flex items-center gap-2 font-medium text-sm"
+          className="p-2.5 sm:px-5 sm:py-3.5 rounded-2xl bg-neutral-900/80 hover:bg-neutral-800 text-neutral-300 hover:text-white border border-neutral-800 transition-all active:scale-95 flex items-center gap-2 font-medium text-xs sm:text-sm shrink-0"
           title="Reset timer (R)"
         >
           <RotateCcw className="w-4 h-4" />
@@ -55,19 +55,19 @@ function TimerControls({ onSaveSession }: TimerControlsProps) {
         {!isRunning ? (
           <button
             onClick={isPaused ? resume : start}
-            className="px-8 sm:px-10 py-3.5 sm:py-4 rounded-2xl bg-white hover:bg-neutral-200 text-black font-bold text-base transition-all active:scale-95 shadow-xl flex items-center gap-2.5"
+            className="px-6 sm:px-10 py-2.5 sm:py-4 rounded-2xl bg-white hover:bg-neutral-200 text-black font-bold text-sm sm:text-base transition-all active:scale-95 shadow-xl flex items-center gap-2 sm:gap-2.5 shrink-0"
             title="Start timer (Space)"
           >
-            <Play className="w-5 h-5 fill-black" />
+            <Play className="w-4 h-4 sm:w-5 sm:h-5 fill-black" />
             <span>{isPaused ? "Resume" : "Start"}</span>
           </button>
         ) : (
           <button
             onClick={pause}
-            className="px-8 sm:px-10 py-3.5 sm:py-4 rounded-2xl bg-white hover:bg-neutral-200 text-black font-bold text-base transition-all active:scale-95 shadow-xl flex items-center gap-2.5"
+            className="px-6 sm:px-10 py-2.5 sm:py-4 rounded-2xl bg-white hover:bg-neutral-200 text-black font-bold text-sm sm:text-base transition-all active:scale-95 shadow-xl flex items-center gap-2 sm:gap-2.5 shrink-0"
             title="Pause timer (Space)"
           >
-            <Pause className="w-5 h-5 fill-black" />
+            <Pause className="w-4 h-4 sm:w-5 sm:h-5 fill-black" />
             <span>Pause</span>
           </button>
         )}
@@ -75,7 +75,7 @@ function TimerControls({ onSaveSession }: TimerControlsProps) {
         {/* Fullscreen Quick Button */}
         <button
           onClick={handleFullscreen}
-          className="p-3.5 sm:px-4 sm:py-3.5 rounded-2xl bg-neutral-900/80 hover:bg-neutral-800 text-neutral-400 hover:text-white border border-neutral-800 transition-all active:scale-95 flex items-center gap-1.5 font-medium text-xs sm:text-sm"
+          className="p-2.5 sm:px-4 sm:py-3.5 rounded-2xl bg-neutral-900/80 hover:bg-neutral-800 text-neutral-400 hover:text-white border border-neutral-800 transition-all active:scale-95 flex items-center gap-1.5 font-medium text-xs sm:text-sm shrink-0"
           title="Enter Fullscreen (F)"
         >
           <Maximize className="w-4 h-4" />
@@ -86,7 +86,7 @@ function TimerControls({ onSaveSession }: TimerControlsProps) {
         {mode === "stopwatch" && (accumulatedSeconds > 5 || isRunning) && (
           <button
             onClick={onSaveSession}
-            className="p-3.5 sm:px-4 sm:py-3.5 rounded-2xl bg-neutral-900/80 hover:bg-neutral-800 text-neutral-300 hover:text-white border border-neutral-800 transition-all active:scale-95 flex items-center gap-2 font-medium text-sm"
+            className="p-2.5 sm:px-4 sm:py-3.5 rounded-2xl bg-neutral-900/80 hover:bg-neutral-800 text-neutral-300 hover:text-white border border-neutral-800 transition-all active:scale-95 flex items-center gap-2 font-medium text-xs sm:text-sm shrink-0"
             title="Save and finish session"
           >
             <Save className="w-4 h-4" />
@@ -95,8 +95,8 @@ function TimerControls({ onSaveSession }: TimerControlsProps) {
         )}
       </div>
 
-      {/* Keyboard Shortcut Hint */}
-      <p className="text-[11px] text-neutral-500 flex items-center gap-2 select-none">
+      {/* Keyboard Shortcut Hint (Desktop only) */}
+      <p className="hidden sm:flex text-[11px] text-neutral-500 items-center gap-2 select-none">
         <span>Press <kbd className="px-1.5 py-0.5 rounded bg-neutral-900 border border-neutral-800 text-neutral-400 font-mono text-[10px]">Space</kbd> to {isRunning ? "pause" : "start"}</span>
         <span>•</span>
         <span><kbd className="px-1.5 py-0.5 rounded bg-neutral-900 border border-neutral-800 text-neutral-400 font-mono text-[10px]">F</kbd> for fullscreen</span>

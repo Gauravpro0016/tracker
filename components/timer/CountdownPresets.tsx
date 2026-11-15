@@ -28,9 +28,9 @@ function CountdownPresets() {
   };
 
   return (
-    <div className="flex flex-col items-center gap-2 mt-4">
+    <div className="flex flex-col items-center gap-1 sm:gap-2 mt-1.5 sm:mt-3 shrink-0">
       {/* Preset Pills */}
-      <div className="flex items-center gap-1.5 flex-wrap justify-center">
+      <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap justify-center px-1">
         {presets.map((preset) => {
           const isSelected = targetSeconds === preset.seconds;
           return (
@@ -38,7 +38,7 @@ function CountdownPresets() {
               key={preset.label}
               disabled={isRunning}
               onClick={() => setTargetSeconds(preset.seconds)}
-              className={`px-3 py-1 rounded-xl text-xs font-semibold border transition-all ${
+              className={`px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-xl text-[11px] sm:text-xs font-semibold border transition-all shrink-0 ${
                 isSelected
                   ? "bg-white text-black border-white"
                   : "bg-neutral-900/60 border-neutral-800 text-neutral-400 hover:text-white hover:border-neutral-700"

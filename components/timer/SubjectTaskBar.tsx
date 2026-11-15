@@ -111,35 +111,35 @@ function SubjectTaskBar() {
   ];
 
   return (
-    <div className="w-full max-w-xl mx-auto flex flex-col sm:flex-row items-center gap-2 mt-4 px-2">
+    <div className="w-full max-w-xl mx-auto flex items-center gap-1.5 sm:gap-2 mt-2 sm:mt-4 px-1 sm:px-2 shrink-0">
       {/* Subject Dropdown */}
-      <div className="relative w-full sm:w-auto shrink-0">
+      <div className="relative shrink-0">
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="w-full sm:w-auto flex items-center justify-between gap-2 px-3.5 py-2.5 rounded-2xl bg-neutral-900/60 hover:bg-neutral-900 border border-neutral-800 text-xs font-semibold text-white transition-all shadow-sm"
+          className="flex items-center justify-between gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl bg-neutral-900/60 hover:bg-neutral-900 border border-neutral-800 text-xs font-semibold text-white transition-all shadow-sm shrink-0 max-w-[130px] sm:max-w-[180px]"
         >
-          <div className="flex items-center gap-2 truncate">
+          <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 truncate">
             {activeSubject ? (
               <>
                 <span
-                  className="w-2.5 h-2.5 rounded-full shrink-0"
+                  className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full shrink-0"
                   style={{ backgroundColor: activeSubject.color }}
                 />
-                <span className="truncate max-w-[120px]">{activeSubject.name}</span>
+                <span className="truncate">{activeSubject.name}</span>
               </>
             ) : (
               <>
-                <Tag className="w-3.5 h-3.5 text-neutral-400" />
-                <span className="text-neutral-400">Select Subject</span>
+                <Tag className="w-3.5 h-3.5 text-neutral-400 shrink-0" />
+                <span className="text-neutral-400 truncate hidden xs:inline sm:inline">Subject</span>
               </>
             )}
           </div>
-          <ChevronDown className="w-3.5 h-3.5 text-neutral-500" />
+          <ChevronDown className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-neutral-500 shrink-0" />
         </button>
 
         {/* Dropdown Menu */}
         {isOpen && (
-          <div className="absolute left-0 mt-2 w-56 p-2 bg-neutral-950/95 backdrop-blur-md border border-neutral-800 rounded-2xl shadow-2xl z-50 animate-fade-in text-white">
+          <div className="absolute left-0 mt-2 w-52 max-w-[calc(100vw-2rem)] p-2 bg-neutral-950/95 backdrop-blur-md border border-neutral-800 rounded-2xl shadow-2xl z-50 animate-fade-in text-white">
             <div className="text-[10px] uppercase font-bold text-neutral-500 px-2 py-1 tracking-wider">
               Subjects
             </div>
@@ -203,13 +203,13 @@ function SubjectTaskBar() {
       </div>
 
       {/* Task Input ("What are you studying?") */}
-      <div className="w-full relative flex-1">
+      <div className="flex-1 min-w-0 relative">
         <input
           type="text"
           value={currentTask}
           onChange={(e) => setTask(e.target.value)}
-          placeholder="What are you studying right now?"
-          className="w-full px-4 py-2.5 bg-neutral-900/60 hover:bg-neutral-900/80 focus:bg-neutral-900 border border-neutral-800 focus:border-neutral-500 rounded-2xl text-xs sm:text-sm text-white placeholder-neutral-500 transition-all focus:outline-none shadow-sm"
+          placeholder="What are you studying?"
+          className="w-full px-3 sm:px-4 py-2 sm:py-2.5 bg-neutral-900/60 hover:bg-neutral-900/80 focus:bg-neutral-900 border border-neutral-800 focus:border-neutral-500 rounded-xl sm:rounded-2xl text-xs sm:text-sm text-white placeholder-neutral-500 transition-all focus:outline-none shadow-sm truncate"
         />
       </div>
 

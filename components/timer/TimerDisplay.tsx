@@ -30,20 +30,20 @@ export default function TimerDisplay({ seconds }: TimerDisplayProps) {
   const rawSize = theme.timerFontSize || "7.5rem";
   const baseSize = parseFloat(rawSize) || 7.5;
   const unit = rawSize.includes("px") ? "px" : "rem";
-  const minFactor = showHours ? 0.38 : 0.45;
   const maxFactor = showHours ? 0.85 : 1;
-  const minSize = `${Math.max(1.6, baseSize * minFactor).toFixed(1)}${unit}`;
   const maxSize = `${(baseSize * maxFactor).toFixed(1)}${unit}`;
-  const vwScale = showHours ? "12vw" : "18vw";
-  const dynamicFontSize = `clamp(${minSize}, ${vwScale}, ${maxSize})`;
+  // Mobile-safe font clamp ensures it smoothly shrinks to fit any phone width without overflow
+  const dynamicFontSize = showHours
+    ? `clamp(1.75rem, 11vw, ${maxSize})`
+    : `clamp(2.25rem, 15vw, ${maxSize})`;
 
   return (
-    <div className="flex flex-col items-center justify-center select-none py-4 sm:py-6 w-full max-w-full overflow-hidden" suppressHydrationWarning>
+    <div className="flex flex-col items-center justify-center select-none py-1.5 sm:py-4 md:py-6 w-full max-w-full overflow-hidden shrink-0" suppressHydrationWarning>
       {/* Pomodoro Phase & Cycle Badge */}
       {mode === "pomodoro" && (
-        <div className="flex items-center gap-1.5 sm:gap-2 mb-3 sm:mb-4 px-2.5 sm:px-3 py-1 rounded-full bg-neutral-900/80 border border-neutral-800 text-[11px] sm:text-xs" suppressHydrationWarning>
+        <div className="flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-3 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full bg-neutral-900/80 border border-neutral-800 text-[10px] sm:text-xs shrink-0" suppressHydrationWarning>
           <span
-            className={`w-2 h-2 rounded-full shrink-0 ${
+            className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full shrink-0 ${
               pomodoroPhase === "focus"
                 ? "bg-rose-500 animate-pulse"
                 : pomodoroPhase === "shortBreak"
@@ -67,28 +67,28 @@ export default function TimerDisplay({ seconds }: TimerDisplayProps) {
 
       {/* Main Large Digits */}
       <div
-        className="font-mono font-bold tracking-tight text-white flex items-center justify-center transition-all max-w-full"
+        className="font-mono font-bold tracking-tight text-white flex items-center justify-center transition-all max-w-full text-center"
         style={{ fontSize: dynamicFontSize, lineHeight: "1" }}
         suppressHydrationWarning
       >
         {theme.digitStyle === "flip" ? (
-          <div className="flex items-center gap-2 md:gap-3" suppressHydrationWarning>
+          <div className="flex items-center gap-1 sm:gap-2 md:gap-3 justify-center max-w-full" suppressHydrationWarning>
             {showHours && (
               <>
-                <div className="flip-digit px-3 py-1 md:px-5 md:py-2">{pad(h)}</div>
-                <span className="text-neutral-600 -mt-2">:</span>
+                <div className="flip-digit px-2 py-0.5 sm:px-3 sm:py-1 md:px-5 md:py-2">{pad(h)}</div>
+                <span className="text-neutral-600 -mt-1 sm:-mt-2">:</span>
               </>
             )}
-            <div className="flip-digit px-3 py-1 md:px-5 md:py-2">{pad(m)}</div>
+            <div className="flip-digit px-2 py-0.5 sm:px-3 sm:py-1 md:px-5 md:py-2">{pad(m)}</div>
             {showSeconds && (
               <>
-                <span className="text-neutral-600 -mt-2">:</span>
-                <div className="flip-digit px-3 py-1 md:px-5 md:py-2">{pad(s)}</div>
+                <span className="text-neutral-600 -mt-1 sm:-mt-2">:</span>
+                <div className="flip-digit px-2 py-0.5 sm:px-3 sm:py-1 md:px-5 md:py-2">{pad(s)}</div>
               </>
             )}
           </div>
         ) : (
-          <div className="tabular-nums flex items-baseline" suppressHydrationWarning>
+          <div className="tabular-nums flex items-baseline justify-center tracking-tight" suppressHydrationWarning>
             {showHours && <span>{pad(h)}:</span>}
             <span>{pad(m)}</span>
             {showSeconds && (

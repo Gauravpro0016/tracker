@@ -126,40 +126,43 @@ export default function TimerPage() {
   }
 
   return (
-    <div ref={timerContainerRef} className="flex flex-col items-center justify-between min-h-[calc(100vh-8rem)] py-2">
+    <div
+      ref={timerContainerRef}
+      className="flex flex-col items-center justify-between w-full h-full max-h-[calc(100dvh-4.25rem)] sm:max-h-none sm:min-h-[calc(100vh-8rem)] py-1 sm:py-2 overflow-hidden sm:overflow-visible"
+    >
       {/* Top bar: Mode tabs + settings */}
-      <div className="w-full flex items-center justify-between max-w-xl mx-auto px-2">
+      <div className="w-full flex items-center justify-between max-w-xl mx-auto px-1 sm:px-2 shrink-0">
         <ManualSessionModal subjects={serverSubjects} />
         <ModeTabs />
         <PomodoroSettingsModal />
       </div>
 
       {/* Main Timer Display Section */}
-      <div className="w-full my-auto flex flex-col items-center">
+      <div className="w-full flex-1 flex flex-col items-center justify-center my-auto min-h-0 shrink-0">
         <TimerDisplay seconds={displaySeconds} />
 
         {/* Countdown Presets if in countdown mode */}
         {mode === "countdown" && <CountdownPresets />}
 
         {/* Primary Controls */}
-        <div className="mt-8">
+        <div className="mt-2.5 sm:mt-6 shrink-0">
           <TimerControls onSaveSession={handleSaveStopwatch} />
         </div>
 
         {/* Subject and Task Selector */}
-        <div className="mt-6 w-full">
+        <div className="mt-2 sm:mt-5 w-full shrink-0">
           <SubjectTaskBar />
         </div>
       </div>
 
-      {/* Embedded Focus Tasks Checklist */}
-      <div className="w-full pb-4">
+      {/* Embedded Focus Tasks Checklist (compact bottom bar on mobile, full card on desktop) */}
+      <div className="w-full shrink-0 pt-1 pb-1 sm:pt-2 sm:pb-4">
         <TimerTodoList />
       </div>
 
-      {/* Guest encouragement banner */}
+      {/* Guest encouragement banner (desktop only to prevent phone overflow) */}
       {!session?.user && (
-        <div className="mt-4 px-4 py-2 rounded-2xl bg-neutral-900/60 border border-neutral-800 text-xs text-neutral-400 flex items-center gap-2">
+        <div className="hidden sm:flex mt-4 px-4 py-2 rounded-2xl bg-neutral-900/60 border border-neutral-800 text-xs text-neutral-400 items-center gap-2 shrink-0">
           <Sparkles className="w-3.5 h-3.5 text-amber-400" />
           <span>You are using FocusDesk as a guest.</span>
           <Link href="/register" className="text-white underline underline-offset-4 font-semibold">
@@ -168,18 +171,19 @@ export default function TimerPage() {
           <span>to sync study history and streaks!</span>
         </div>
       )}
+
       {/* Quick AI Study Coach Floating Button */}
       <Link
         href="/ai"
         onMouseMove={(e) => gsapMagnetic(e, 0.25)}
         onMouseLeave={gsapResetMagnetic}
-        className="fixed bottom-24 sm:bottom-8 right-6 z-30 flex items-center gap-2 px-4 py-2.5 rounded-full bg-neutral-900/95 hover:bg-neutral-850 text-white border border-neutral-700/80 shadow-2xl backdrop-blur-md text-xs font-medium hover:border-violet-500/50 hover:text-violet-200 transition-all group"
+        className="fixed bottom-14 sm:bottom-6 right-3 sm:right-6 z-30 flex items-center gap-1.5 sm:gap-2 px-3 py-2 sm:px-4 sm:py-2.5 rounded-full bg-neutral-900/95 hover:bg-neutral-850 text-white border border-neutral-700/80 shadow-2xl backdrop-blur-md text-xs font-medium hover:border-violet-500/50 hover:text-violet-200 transition-all group"
         title="Open AI Study Coach & Problem Solver"
       >
         <span className="p-1 rounded-full bg-violet-600/20 text-violet-400 border border-violet-500/30 group-hover:rotate-12 transition-transform">
           <Sparkles className="w-3.5 h-3.5" />
         </span>
-        <span className="font-semibold">AI Coach</span>
+        <span className="font-semibold text-xs">AI Coach</span>
       </Link>
     </div>
   );

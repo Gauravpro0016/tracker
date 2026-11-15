@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Plus, Check, Trash2, ListTodo } from "lucide-react";
+import { Plus, Check, Trash2, ListTodo, ChevronUp, X } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -117,94 +117,157 @@ function TimerTodoList() {
     },
   });
 
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
   const handleAdd = (e: React.FormEvent) => {
     e.preventDefault();
     if (!inputText.trim()) return;
     addTaskMutation.mutate(inputText.trim());
   };
 
-  return (
-    <div className="w-full max-w-xl mx-auto mt-8 p-4 sm:p-5 rounded-3xl bg-neutral-950/60 backdrop-blur-md border border-neutral-800/80 shadow-xl text-white">
-      <div className="flex items-center justify-between pb-3 mb-3 border-b border-neutral-800/80">
-        <div className="flex items-center gap-2">
-          <ListTodo className="w-4 h-4 text-neutral-400" />
-          <h3 className="text-xs sm:text-sm font-semibold tracking-tight">Today's Focus Tasks</h3>
-        </div>
-        <span className="text-[11px] text-neutral-500 font-mono">
-          {tasks.filter((t) => t.completed).length} / {tasks.length} Done
-        </span>
-      </div>
+  const completedCount = tasks.filter((t) => t.completed).length;
 
-      {/* Task input */}
-      <form onSubmit={handleAdd} className="flex items-center gap-2 mb-3">
-        <input
-          type="text"
-          value={inputText}
-          onChange={(e) => setInputText(e.target.value)}
-          placeholder="Add a study task and press enter..."
-          className="flex-1 px-3.5 py-2 bg-neutral-900/80 hover:bg-neutral-900 border border-neutral-800 focus:border-neutral-500 rounded-xl text-xs sm:text-sm text-white placeholder-neutral-500 focus:outline-none transition-all"
-        />
-        <button
-          type="submit"
-          disabled={!inputText.trim() || addTaskMutation.isPending}
-          className="p-2 sm:px-3 sm:py-2 bg-white text-black font-semibold rounded-xl text-xs hover:bg-neutral-200 transition-all disabled:opacity-40"
-          title="Add task"
-        >
-          <Plus className="w-4 h-4" />
-        </button>
-      </form>
+  const renderTaskForm = (isMobile = false) => (
+    <form onSubmit={handleAdd} className="flex items-center gap-2 mb-3">
+      <input
+        type="text"
+        value={inputText}
+        onChange={(e) => setInputText(e.target.value)}
+        placeholder="Add a study task and press enter..."
+        className="flex-1 px-3.5 py-2 bg-neutral-900/80 hover:bg-neutral-900 border border-neutral-800 focus:border-neutral-500 rounded-xl text-xs sm:text-sm text-white placeholder-neutral-500 focus:outline-none transition-all"
+      />
+      <button
+        type="submit"
+        disabled={!inputText.trim() || addTaskMutation.isPending}
+        className="p-2 sm:px-3 sm:py-2 bg-white text-black font-semibold rounded-xl text-xs hover:bg-neutral-200 transition-all disabled:opacity-40"
+        title="Add task"
+      >
+        <Plus className="w-4 h-4" />
+      </button>
+    </form>
+  );
 
-      {/* Task list */}
-      <div className="space-y-1.5 max-h-56 overflow-y-auto pr-1">
-        {tasks.length === 0 ? (
-          <p className="text-center py-4 text-xs text-neutral-500">
-            No study tasks yet. Add one above!
-          </p>
-        ) : (
-          tasks.map((task) => {
-            const taskId = task._id || task.id || "";
-            return (
-              <div
-                key={taskId}
-                className="group flex items-center justify-between p-2 sm:px-3 rounded-xl bg-neutral-900/40 hover:bg-neutral-900/80 border border-neutral-800/60 transition-all text-xs sm:text-sm"
+  const renderTaskList = (maxHeight = "max-h-56") => (
+    <div className={`space-y-1.5 ${maxHeight} overflow-y-auto pr-1`}>
+      {tasks.length === 0 ? (
+        <p className="text-center py-4 text-xs text-neutral-500">
+          No study tasks yet. Add one above!
+        </p>
+      ) : (
+        tasks.map((task) => {
+          const taskId = task._id || task.id || "";
+          return (
+            <div
+              key={taskId}
+              className="group flex items-center justify-between p-2 sm:px-3 rounded-xl bg-neutral-900/40 hover:bg-neutral-900/80 border border-neutral-800/60 transition-all text-xs sm:text-sm"
+            >
+              <button
+                onClick={() =>
+                  toggleTaskMutation.mutate({ id: taskId, completed: task.completed })
+                }
+                className="flex items-center gap-2.5 flex-1 text-left min-w-0"
               >
-                <button
-                  onClick={() =>
-                    toggleTaskMutation.mutate({ id: taskId, completed: task.completed })
-                  }
-                  className="flex items-center gap-2.5 flex-1 text-left min-w-0"
+                <div
+                  className={`w-4 h-4 rounded-md border flex items-center justify-center transition-colors shrink-0 ${
+                    task.completed
+                      ? "bg-white border-white text-black"
+                      : "border-neutral-700 hover:border-neutral-500"
+                  }`}
                 >
-                  <div
-                    className={`w-4 h-4 rounded-md border flex items-center justify-center transition-colors shrink-0 ${
-                      task.completed
-                        ? "bg-white border-white text-black"
-                        : "border-neutral-700 hover:border-neutral-500"
-                    }`}
-                  >
-                    {task.completed && <Check className="w-3 h-3 stroke-[3]" />}
-                  </div>
-                  <span
-                    className={`truncate ${
-                      task.completed ? "line-through text-neutral-500" : "text-neutral-200"
-                    }`}
-                  >
-                    {task.text}
-                  </span>
-                </button>
+                  {task.completed && <Check className="w-3 h-3 stroke-[3]" />}
+                </div>
+                <span
+                  className={`truncate ${
+                    task.completed ? "line-through text-neutral-500" : "text-neutral-200"
+                  }`}
+                >
+                  {task.text}
+                </span>
+              </button>
 
-                <button
-                  onClick={() => deleteTaskMutation.mutate(taskId)}
-                  className="opacity-70 sm:opacity-0 sm:group-hover:opacity-100 p-1 text-neutral-500 hover:text-rose-400 rounded transition-all shrink-0 ml-2"
-                  title="Delete task"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            );
-          })
-        )}
-      </div>
+              <button
+                onClick={() => deleteTaskMutation.mutate(taskId)}
+                className="opacity-70 sm:opacity-0 sm:group-hover:opacity-100 p-1 text-neutral-500 hover:text-rose-400 rounded transition-all shrink-0 ml-2"
+                title="Delete task"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          );
+        })
+      )}
     </div>
+  );
+
+  return (
+    <>
+      {/* Mobile Drawer Toggle Bar */}
+      <div className="sm:hidden w-full max-w-xl mx-auto px-1">
+        <button
+          onClick={() => setIsDrawerOpen(true)}
+          className="w-full flex items-center justify-between px-3 py-2 rounded-2xl bg-neutral-950/70 hover:bg-neutral-900/90 border border-neutral-800/80 text-xs text-white transition-all shadow-sm active:scale-[0.99]"
+        >
+          <div className="flex items-center gap-2 min-w-0">
+            <ListTodo className="w-3.5 h-3.5 text-neutral-400 shrink-0" />
+            <span className="font-semibold text-neutral-200 truncate">Focus Tasks</span>
+            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-neutral-900 border border-neutral-800 text-neutral-400 font-mono">
+              {completedCount}/{tasks.length} Done
+            </span>
+          </div>
+          <div className="flex items-center gap-1 text-[11px] text-neutral-400 font-medium shrink-0">
+            <span>Manage</span>
+            <ChevronUp className="w-3.5 h-3.5" />
+          </div>
+        </button>
+      </div>
+
+      {/* Mobile Bottom-Sheet Modal */}
+      {isDrawerOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-end sm:hidden bg-black/80 backdrop-blur-sm animate-fade-in"
+          onClick={() => setIsDrawerOpen(false)}
+        >
+          <div
+            className="w-full bg-neutral-950 border-t border-neutral-800 rounded-t-3xl p-4 pb-8 max-h-[85vh] flex flex-col shadow-2xl text-white"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="w-12 h-1 bg-neutral-800 rounded-full mx-auto mb-3" />
+            <div className="flex items-center justify-between pb-3 mb-3 border-b border-neutral-800/80">
+              <div className="flex items-center gap-2">
+                <ListTodo className="w-4 h-4 text-neutral-400" />
+                <h3 className="text-sm font-semibold tracking-tight">Today's Focus Tasks</h3>
+                <span className="text-[11px] text-neutral-400 font-mono">
+                  ({completedCount}/{tasks.length} Done)
+                </span>
+              </div>
+              <button
+                onClick={() => setIsDrawerOpen(false)}
+                className="p-1 rounded-lg text-neutral-400 hover:text-white"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            {renderTaskForm(true)}
+            {renderTaskList("max-h-[50vh]")}
+          </div>
+        </div>
+      )}
+
+      {/* Tablet & Desktop Inline Card */}
+      <div className="hidden sm:block w-full max-w-xl mx-auto mt-6 p-4 sm:p-5 rounded-3xl bg-neutral-950/60 backdrop-blur-md border border-neutral-800/80 shadow-xl text-white">
+        <div className="flex items-center justify-between pb-3 mb-3 border-b border-neutral-800/80">
+          <div className="flex items-center gap-2">
+            <ListTodo className="w-4 h-4 text-neutral-400" />
+            <h3 className="text-xs sm:text-sm font-semibold tracking-tight">Today's Focus Tasks</h3>
+          </div>
+          <span className="text-[11px] text-neutral-500 font-mono">
+            {completedCount} / {tasks.length} Done
+          </span>
+        </div>
+        {renderTaskForm(false)}
+        {renderTaskList("max-h-56")}
+      </div>
+    </>
   );
 }
 

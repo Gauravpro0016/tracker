@@ -40,6 +40,7 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useTimerStore } from "@/store/timerStore";
 import { gsapFadeIn, gsapStagger, gsapMagnetic, gsapResetMagnetic, gsapAudioWave } from "@/lib/gsap-animations";
+import FormattedContent from "@/components/ai/FormattedContent";
 
 type TabType = "coach" | "planner" | "quiz" | "analytics" | "history";
 type HistoryFilter = "all" | "chat" | "planner" | "quiz" | "analytics";
@@ -436,7 +437,18 @@ export default function AIPage() {
     }
 
     const clean = text
-      .replace(/[*#_`>]/g, "")
+      // Convert common LaTeX math formulas to natural spoken words
+      .replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, "$1 over $2")
+      .replace(/\\sqrt\{([^}]+)\}/g, "square root of $1")
+      .replace(/\\tan\s*(?:\(?\\?theta\)?|\(([^)]+)\))/g, "tangent of theta")
+      .replace(/\\sin\s*(?:\(?\\?theta\)?|\(([^)]+)\))/g, "sine of theta")
+      .replace(/\\cos\s*(?:\(?\\?theta\)?|\(([^)]+)\))/g, "cosine of theta")
+      .replace(/\\theta/g, "theta")
+      .replace(/\\pi/g, "pi")
+      .replace(/\\text\{([^}]+)\}/g, "$1")
+      .replace(/\\times/g, " times ")
+      .replace(/\\approx/g, " approximately ")
+      .replace(/[*#_`>$]/g, "")
       .replace(/\[.*?\]\(.*?\)/g, "")
       .slice(0, 600);
 
@@ -816,102 +828,102 @@ export default function AIPage() {
   const chatSessions = historyItems.filter((i) => i.type === "chat");
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8 space-y-6">
+    <div className="w-full max-w-7xl mx-auto space-y-4 sm:space-y-6">
       {/* Top Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-neutral-800">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 pb-4 sm:pb-6 border-b border-neutral-800">
         <div>
           <div className="flex items-center gap-2.5">
             <span className="p-2 rounded-xl bg-violet-600/10 border border-violet-500/20 text-violet-400 shadow-sm shadow-violet-500/10">
-              <Sparkles className="w-6 h-6 animate-pulse" />
+              <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 animate-pulse" />
             </span>
-            <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-white">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight text-white">
               AI Academic Hub
             </h1>
           </div>
-          <p className="text-sm text-neutral-400 mt-1">
+          <p className="text-xs sm:text-sm text-neutral-400 mt-1">
             Multimodal Study Coach, Real-time Voice Speech-to-Text, Exam Planner, Quizzes & Full History.
           </p>
         </div>
 
         {/* Action Controls */}
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2 self-start sm:self-auto">
           <button
             onClick={() => setActiveTab("history")}
             onMouseMove={(e) => gsapMagnetic(e, 0.2)}
             onMouseLeave={gsapResetMagnetic}
             className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium border transition-all ${
               activeTab === "history"
-                ? "bg-white text-black border-white shadow"
+                ? "bg-violet-600 text-white border-violet-500 shadow-md shadow-violet-600/20"
                 : "border-neutral-800 bg-neutral-900/80 text-neutral-300 hover:text-white hover:bg-neutral-800"
             }`}
             title="View All History (Chats, Plans, Quizzes, Analytics)"
           >
-            <History className="w-3.5 h-3.5" />
+            <History className="w-3.5 h-3.5 text-violet-400" />
             <span>History ({historyItems.length})</span>
           </button>
         </div>
       </div>
 
-      {/* Tabs Navigation */}
-      <div className="flex items-center gap-2 p-1.5 rounded-2xl bg-neutral-950 border border-neutral-800 overflow-x-auto shadow-inner">
+      {/* Tabs Navigation (Fluid Scrollable on Mobile/Tablet) */}
+      <div className="flex items-center gap-1.5 sm:gap-2 p-1.5 rounded-2xl bg-neutral-950 border border-neutral-800 overflow-x-auto scrollbar-none shadow-inner">
         <button
           onClick={() => setActiveTab("coach")}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all shrink-0 ${
+          className={`flex items-center gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-medium transition-all shrink-0 ${
             activeTab === "coach"
               ? "bg-white text-black shadow-md font-semibold"
               : "text-neutral-400 hover:text-white hover:bg-neutral-900"
           }`}
         >
-          <MessageSquare className="w-4 h-4" />
-          <span>Study Coach & Voice</span>
+          <MessageSquare className="w-4 h-4 shrink-0" />
+          <span className="whitespace-nowrap">Study Coach <span className="hidden sm:inline">& Voice</span></span>
         </button>
 
         <button
           onClick={() => setActiveTab("planner")}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all shrink-0 ${
+          className={`flex items-center gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-medium transition-all shrink-0 ${
             activeTab === "planner"
               ? "bg-white text-black shadow-md font-semibold"
               : "text-neutral-400 hover:text-white hover:bg-neutral-900"
           }`}
         >
-          <Calendar className="w-4 h-4" />
-          <span>Exam & Schedule Planner</span>
+          <Calendar className="w-4 h-4 shrink-0" />
+          <span className="whitespace-nowrap">Exam Planner <span className="hidden md:inline">& Schedule</span></span>
         </button>
 
         <button
           onClick={() => setActiveTab("quiz")}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all shrink-0 ${
+          className={`flex items-center gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-medium transition-all shrink-0 ${
             activeTab === "quiz"
               ? "bg-white text-black shadow-md font-semibold"
               : "text-neutral-400 hover:text-white hover:bg-neutral-900"
           }`}
         >
-          <HelpCircle className="w-4 h-4" />
-          <span>Quiz Generator</span>
+          <HelpCircle className="w-4 h-4 shrink-0" />
+          <span className="whitespace-nowrap">Quiz Generator</span>
         </button>
 
         <button
           onClick={() => setActiveTab("analytics")}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all shrink-0 ${
+          className={`flex items-center gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-medium transition-all shrink-0 ${
             activeTab === "analytics"
               ? "bg-white text-black shadow-md font-semibold"
               : "text-neutral-400 hover:text-white hover:bg-neutral-900"
           }`}
         >
-          <BarChart3 className="w-4 h-4" />
-          <span>AI Performance Coach</span>
+          <BarChart3 className="w-4 h-4 shrink-0" />
+          <span className="whitespace-nowrap">AI Analytics</span>
         </button>
 
         <button
           onClick={() => setActiveTab("history")}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all shrink-0 ml-auto ${
+          className={`flex items-center gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-medium transition-all shrink-0 sm:ml-auto ${
             activeTab === "history"
               ? "bg-white text-black shadow-md font-semibold"
               : "text-neutral-400 hover:text-white hover:bg-neutral-900"
           }`}
         >
-          <History className="w-4 h-4" />
-          <span>All History</span>
+          <History className="w-4 h-4 shrink-0" />
+          <span className="whitespace-nowrap">All History</span>
         </button>
       </div>
 
@@ -921,12 +933,12 @@ export default function AIPage() {
         {/* TAB 1: STUDY COACH & VOICE & IMAGE EXPLANATION */}
         {/* ------------------------------------------------------------- */}
         {activeTab === "coach" && (
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6">
             {/* Main Chat Box */}
-            <div className="lg:col-span-3 flex flex-col h-[670px] bg-neutral-950 rounded-2xl border border-neutral-800 shadow-xl overflow-hidden relative">
+            <div className="lg:col-span-3 flex flex-col h-[540px] sm:h-[620px] lg:h-[680px] bg-neutral-950 rounded-2xl border border-neutral-800 shadow-xl overflow-hidden relative">
               {/* Coach Toolbar */}
-              <div className="h-14 px-4 border-b border-neutral-800 flex items-center justify-between bg-neutral-900/40">
-                <div className="flex items-center gap-2.5">
+              <div className="h-14 px-3 sm:px-4 border-b border-neutral-800 flex items-center justify-between bg-neutral-900/40">
+                <div className="flex items-center gap-2">
                   <button
                     onClick={() => setShowChatDrawer(!showChatDrawer)}
                     className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-neutral-800 bg-neutral-900 text-xs text-neutral-300 hover:text-white hover:bg-neutral-800 transition-all"
@@ -942,11 +954,11 @@ export default function AIPage() {
                     title="Start a new clean chat"
                   >
                     <Plus className="w-3.5 h-3.5" />
-                    <span>New Chat</span>
+                    <span className="hidden sm:inline">New Chat</span>
                   </button>
                 </div>
 
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 sm:gap-3">
                   <button
                     onClick={() => setAutoVoice(!autoVoice)}
                     className={`flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg border transition-all ${
@@ -957,14 +969,14 @@ export default function AIPage() {
                     title="Toggle Auto-Voice reading of answers"
                   >
                     {autoVoice ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
-                    <span>Auto-Voice</span>
+                    <span className="hidden xs:inline">Auto-Voice</span>
                   </button>
                 </div>
               </div>
 
               {/* Chat Sessions Slide Drawer */}
               {showChatDrawer && (
-                <div className="absolute top-14 left-0 bottom-0 w-72 bg-neutral-950/95 backdrop-blur-md border-r border-neutral-800 z-30 p-3 space-y-3 flex flex-col shadow-2xl">
+                <div className="absolute top-14 left-0 bottom-0 w-72 max-w-[85vw] bg-neutral-950/95 backdrop-blur-md border-r border-neutral-800 z-30 p-3 space-y-3 flex flex-col shadow-2xl">
                   <div className="flex items-center justify-between pb-2 border-b border-neutral-800">
                     <h4 className="text-xs font-semibold text-white uppercase tracking-wider">
                       Previous Chats
@@ -1042,23 +1054,26 @@ export default function AIPage() {
                       )}
 
                       <div
-                        className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed space-y-2.5 ${
+                        className={`max-w-[88%] sm:max-w-[80%] rounded-2xl px-3.5 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm leading-relaxed space-y-2.5 ${
                           isBot
                             ? "bg-neutral-900/90 text-neutral-200 border border-neutral-800 shadow-sm"
-                            : "bg-white text-black font-normal ml-auto shadow"
+                            : "bg-neutral-800/90 border border-neutral-700/80 text-white font-normal ml-auto shadow-sm"
                         }`}
                       >
                         {m.image && (
-                          <div className="rounded-xl overflow-hidden border border-neutral-800 mb-2 max-w-sm">
+                          <div className="rounded-xl overflow-hidden border border-neutral-800 mb-2 w-full max-w-xs sm:max-w-sm">
                             <img
                               src={m.image}
                               alt="Uploaded question"
-                              className="w-full h-auto object-cover max-h-64"
+                              className="w-full h-auto object-cover max-h-56 sm:max-h-64"
                             />
                           </div>
                         )}
 
-                        <div className="whitespace-pre-wrap">{m.content}</div>
+                        <FormattedContent
+                          content={m.content}
+                          className={isBot ? "text-neutral-200" : "text-white font-normal"}
+                        />
 
                         {isBot && (
                           <div className="pt-2 flex items-center gap-2 border-t border-neutral-800/80">
@@ -1170,16 +1185,16 @@ export default function AIPage() {
               )}
 
               {/* Input Form with Real-time Voice & Image Upload */}
-              <div className="p-3 bg-neutral-900/60 border-t border-neutral-800">
+              <div className="p-2.5 sm:p-3 bg-neutral-950 border-t border-neutral-800">
                 <form
                   onSubmit={(e) => {
                     e.preventDefault();
                     handleSendCoach();
                   }}
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-1.5 sm:gap-2"
                 >
                   {/* Image Upload Button */}
-                  <label className="p-2.5 rounded-xl border border-neutral-800 bg-neutral-900 text-neutral-400 hover:text-white hover:border-neutral-700 cursor-pointer transition-all">
+                  <label className="p-2 sm:p-2.5 rounded-xl border border-neutral-800 bg-neutral-900 text-neutral-400 hover:text-white hover:border-neutral-700 cursor-pointer transition-all shrink-0">
                     <ImageIcon className="w-4 h-4" />
                     <input
                       type="file"
@@ -1193,7 +1208,7 @@ export default function AIPage() {
                   <button
                     type="button"
                     onClick={toggleRecording}
-                    className={`p-2.5 rounded-xl border transition-all ${
+                    className={`p-2 sm:p-2.5 rounded-xl border transition-all shrink-0 ${
                       isRecording
                         ? "bg-red-500 text-white border-red-400 shadow-lg shadow-red-500/30 scale-105"
                         : "border-neutral-800 bg-neutral-900 text-neutral-400 hover:text-white hover:border-neutral-700"
@@ -1203,7 +1218,7 @@ export default function AIPage() {
                     {isRecording ? <MicOff className="w-4 h-4 animate-pulse" /> : <Mic className="w-4 h-4" />}
                   </button>
 
-                  {/* Text Input */}
+                  {/* Text Input - Dark themed & responsive */}
                   <input
                     type="text"
                     value={coachInput}
@@ -1213,7 +1228,7 @@ export default function AIPage() {
                         ? "Transcribing your voice in real-time..."
                         : "Ask anything, explain concepts, paste textbook problems..."
                     }
-                    className="flex-1 bg-black border border-neutral-800 focus:border-neutral-600 rounded-xl px-4 py-2.5 text-sm text-white placeholder-neutral-500 focus:outline-none transition-all"
+                    className="flex-1 min-w-0 bg-neutral-900 border border-neutral-800 focus:border-neutral-700 focus:bg-neutral-900/90 rounded-xl px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm text-white placeholder-neutral-500 focus:outline-none transition-all"
                     disabled={coachLoading}
                   />
 
@@ -1221,7 +1236,8 @@ export default function AIPage() {
                   <button
                     type="submit"
                     disabled={coachLoading || (!coachInput.trim() && !attachedImage && !attachedAudio)}
-                    className="p-2.5 rounded-xl bg-white text-black hover:bg-neutral-200 disabled:opacity-40 disabled:cursor-not-allowed transition-all font-semibold shadow"
+                    className="p-2 sm:p-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white disabled:opacity-40 disabled:cursor-not-allowed transition-all font-semibold shadow-md shadow-violet-600/20 shrink-0"
+                    title="Send message"
                   >
                     <Send className="w-4 h-4" />
                   </button>
@@ -1302,7 +1318,7 @@ export default function AIPage() {
                     type="text"
                     value={plannerExamTitle}
                     onChange={(e) => setPlannerExamTitle(e.target.value)}
-                    className="w-full bg-black border border-neutral-800 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-neutral-600"
+                    className="w-full bg-neutral-900 border border-neutral-800 focus:border-neutral-700 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white focus:outline-none transition-all"
                     placeholder="e.g. Calculus II Final or MCAT Physics"
                   />
                 </div>
@@ -1315,7 +1331,7 @@ export default function AIPage() {
                     type="date"
                     value={plannerExamDate}
                     onChange={(e) => setPlannerExamDate(e.target.value)}
-                    className="w-full bg-black border border-neutral-800 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-neutral-600"
+                    className="w-full bg-neutral-900 border border-neutral-800 focus:border-neutral-700 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white focus:outline-none transition-all [color-scheme:dark]"
                   />
                 </div>
 
@@ -1327,12 +1343,12 @@ export default function AIPage() {
                     rows={4}
                     value={plannerTopics}
                     onChange={(e) => setPlannerTopics(e.target.value)}
-                    className="w-full bg-black border border-neutral-800 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-neutral-600 resize-none font-mono"
+                    className="w-full bg-neutral-900 border border-neutral-800 focus:border-neutral-700 rounded-xl p-3 text-xs text-white focus:outline-none transition-all resize-none font-mono"
                     placeholder="Paste chapters, lecture titles, or syllabus outline..."
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="block text-xs font-medium text-neutral-300 mb-1.5">
                       Target Daily Hours
@@ -1340,7 +1356,7 @@ export default function AIPage() {
                     <select
                       value={plannerDailyHours}
                       onChange={(e) => setPlannerDailyHours(Number(e.target.value))}
-                      className="w-full bg-black border border-neutral-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-neutral-600"
+                      className="w-full bg-neutral-900 border border-neutral-800 focus:border-neutral-700 rounded-xl px-3 py-2 text-xs sm:text-sm text-white focus:outline-none transition-all [color-scheme:dark]"
                     >
                       <option value={1}>1 hour/day</option>
                       <option value={2}>2 hours/day</option>
@@ -1357,7 +1373,7 @@ export default function AIPage() {
                     <select
                       value={plannerTimePref}
                       onChange={(e) => setPlannerTimePref(e.target.value)}
-                      className="w-full bg-black border border-neutral-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-neutral-600"
+                      className="w-full bg-neutral-900 border border-neutral-800 focus:border-neutral-700 rounded-xl px-3 py-2 text-xs sm:text-sm text-white focus:outline-none transition-all [color-scheme:dark]"
                     >
                       <option value="morning">Morning (08:00)</option>
                       <option value="afternoon">Afternoon (14:00)</option>
@@ -1538,7 +1554,7 @@ export default function AIPage() {
                     rows={3}
                     value={quizTopic}
                     onChange={(e) => setQuizTopic(e.target.value)}
-                    className="w-full bg-black border border-neutral-800 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-neutral-600 resize-none"
+                    className="w-full bg-neutral-900 border border-neutral-800 focus:border-neutral-700 rounded-xl p-3 text-xs sm:text-sm text-white focus:outline-none transition-all resize-none"
                     placeholder="e.g. Mitosis vs Meiosis, Calculus Derivatives, or paste your summary notes..."
                   />
                 </div>
@@ -1598,8 +1614,8 @@ export default function AIPage() {
                   </p>
                 </div>
               ) : (
-                <div className="bg-neutral-950 p-6 rounded-2xl border border-neutral-800 space-y-6 shadow-xl">
-                  <div className="flex items-center justify-between pb-4 border-b border-neutral-800">
+                <div className="bg-neutral-950 p-4 sm:p-6 rounded-2xl border border-neutral-800 space-y-4 sm:space-y-6 shadow-xl">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-neutral-800">
                     <div>
                       <h3 className="text-base font-semibold text-white">{activeQuiz.title}</h3>
                       <span className="text-xs text-neutral-400">
@@ -1650,7 +1666,9 @@ export default function AIPage() {
                             <span className="w-6 h-6 rounded-lg bg-neutral-800 text-neutral-300 text-xs font-semibold flex items-center justify-center shrink-0 mt-0.5">
                               {qIdx + 1}
                             </span>
-                            <h4 className="text-sm font-medium text-white">{q.question}</h4>
+                            <div className="text-sm font-medium text-white flex-1">
+                              <FormattedContent content={q.question} />
+                            </div>
                           </div>
 
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
@@ -1681,7 +1699,9 @@ export default function AIPage() {
                                   onClick={() => handleSelectQuizAnswer(qIdx, optIdx)}
                                   className={`text-left p-3 rounded-xl border text-xs transition-all flex items-center justify-between ${btnStyle}`}
                                 >
-                                  <span>{opt}</span>
+                                  <div className="flex-1">
+                                    <FormattedContent content={opt} />
+                                  </div>
                                   {quizSubmitted && isThisCorrect && (
                                     <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 ml-2" />
                                   )}
@@ -1695,15 +1715,15 @@ export default function AIPage() {
 
                           {quizSubmitted && (
                             <div className="mt-3 p-3 rounded-xl bg-neutral-950 border border-neutral-800 text-xs space-y-1.5">
-                              <p className="text-neutral-300">
-                                <strong className="text-white">Explanation: </strong>
-                                {q.explanation}
-                              </p>
+                              <div className="text-neutral-300">
+                                <strong className="text-white block mb-0.5">Explanation: </strong>
+                                <FormattedContent content={q.explanation} />
+                              </div>
                               {q.studyTip && (
-                                <p className="text-violet-400 flex items-center gap-1.5">
-                                  <Lightbulb className="w-3.5 h-3.5 shrink-0" />
-                                  <span>{q.studyTip}</span>
-                                </p>
+                                <div className="text-violet-400 flex items-start gap-1.5 pt-1">
+                                  <Lightbulb className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                                  <FormattedContent content={q.studyTip} />
+                                </div>
                               )}
                             </div>
                           )}
@@ -1721,10 +1741,10 @@ export default function AIPage() {
         {/* TAB 4: AI PERFORMANCE ANALYTICS COACH */}
         {/* ------------------------------------------------------------- */}
         {activeTab === "analytics" && (
-          <div className="space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-2xl bg-neutral-950 border border-neutral-800 shadow-xl">
+          <div className="space-y-4 sm:space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 sm:p-6 rounded-2xl bg-neutral-950 border border-neutral-800 shadow-xl">
               <div>
-                <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+                <h2 className="text-base sm:text-lg font-semibold text-white flex items-center gap-2">
                   <BarChart3 className="w-5 h-5 text-violet-400" />
                   <span>Cognitive Habits & Performance Evaluation</span>
                 </h2>
@@ -1739,7 +1759,7 @@ export default function AIPage() {
                 disabled={analyticsLoading}
                 onMouseMove={(e) => gsapMagnetic(e, 0.2)}
                 onMouseLeave={gsapResetMagnetic}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white text-black font-semibold text-xs hover:bg-neutral-200 transition-all shrink-0 disabled:opacity-50 shadow"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-semibold text-xs transition-all shrink-0 disabled:opacity-50 shadow-md shadow-violet-600/20"
               >
                 {analyticsLoading ? (
                   <>
@@ -1761,8 +1781,8 @@ export default function AIPage() {
                 <p className="text-sm text-neutral-300">Analyzing your study logs and session patterns...</p>
               </div>
             ) : analyticsData?.insights ? (
-              <div className="space-y-6">
-                <div className="p-6 rounded-2xl bg-gradient-to-r from-violet-950/40 via-neutral-950 to-neutral-950 border border-violet-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xl">
+              <div className="space-y-4 sm:space-y-6">
+                <div className="p-4 sm:p-6 rounded-2xl bg-gradient-to-r from-violet-950/40 via-neutral-950 to-neutral-950 border border-violet-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xl">
                   <div className="space-y-1">
                     <span className="text-[10px] uppercase font-bold tracking-widest text-violet-400 px-2 py-0.5 rounded-full bg-violet-500/10 border border-violet-500/20">
                       Learning Persona
@@ -1888,7 +1908,7 @@ export default function AIPage() {
             </div>
 
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-1.5 sm:pb-0 scrollbar-none">
                 {[
                   { id: "all", label: "All Items" },
                   { id: "chat", label: "💬 Coach Chats" },
@@ -1917,7 +1937,7 @@ export default function AIPage() {
                   value={historySearch}
                   onChange={(e) => setHistorySearch(e.target.value)}
                   placeholder="Search history..."
-                  className="w-full bg-neutral-950 border border-neutral-800 rounded-xl pl-9 pr-3.5 py-1.5 text-xs text-white focus:outline-none focus:border-neutral-600"
+                  className="w-full bg-neutral-900 border border-neutral-800 focus:border-neutral-700 rounded-xl pl-9 pr-3.5 py-2 text-xs text-white focus:outline-none transition-all"
                 />
               </div>
             </div>
@@ -2054,7 +2074,7 @@ export default function AIPage() {
       {/* QUIZ REVIEW MODAL FROM HISTORY */}
       {selectedReviewItem && selectedReviewItem.type === "quiz" && (
         <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-neutral-950 border border-neutral-800 rounded-2xl max-w-2xl w-full p-6 space-y-5 max-h-[85vh] overflow-y-auto shadow-2xl">
+          <div className="bg-neutral-950 border border-neutral-800 rounded-2xl max-w-2xl w-full p-4 sm:p-6 space-y-4 sm:space-y-5 max-h-[90vh] overflow-y-auto shadow-2xl">
             <div className="flex items-center justify-between pb-3 border-b border-neutral-800">
               <div>
                 <h3 className="text-base font-semibold text-white">
@@ -2082,9 +2102,12 @@ export default function AIPage() {
                     key={idx}
                     className="p-4 rounded-xl bg-neutral-900/60 border border-neutral-800 space-y-2.5 text-xs"
                   >
-                    <p className="font-medium text-white">
-                      {idx + 1}. {q.question}
-                    </p>
+                    <div className="font-medium text-white flex items-start gap-1">
+                      <span>{idx + 1}.</span>
+                      <div className="flex-1">
+                        <FormattedContent content={q.question} />
+                      </div>
+                    </div>
                     <div className="space-y-1">
                       {q.options?.map((opt: string, optIdx: number) => {
                         const isCorrectOpt = q.correctAnswerIndex === optIdx;
@@ -2101,18 +2124,20 @@ export default function AIPage() {
                                 : "border-neutral-800/80 text-neutral-400 bg-black/40"
                             }`}
                           >
-                            <span>{opt}</span>
-                            {isCorrectOpt && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 ml-2" />}
-                            {isChosenOpt && !isCorrectOpt && <XCircle className="w-3.5 h-3.5 text-rose-400 ml-2" />}
+                            <div className="flex-1">
+                              <FormattedContent content={opt} />
+                            </div>
+                            {isCorrectOpt && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 ml-2 shrink-0" />}
+                            {isChosenOpt && !isCorrectOpt && <XCircle className="w-3.5 h-3.5 text-rose-400 ml-2 shrink-0" />}
                           </div>
                         );
                       })}
                     </div>
                     {q.explanation && (
-                      <p className="text-neutral-400 pt-1">
-                        <strong className="text-neutral-200">Explanation: </strong>
-                        {q.explanation}
-                      </p>
+                      <div className="text-neutral-400 pt-1">
+                        <strong className="text-neutral-200 block mb-0.5">Explanation: </strong>
+                        <FormattedContent content={q.explanation} />
+                      </div>
                     )}
                   </div>
                 );

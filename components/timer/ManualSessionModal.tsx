@@ -94,12 +94,11 @@ function ManualSessionModal({ subjects }: ManualSessionModalProps) {
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-neutral-900/60 hover:bg-neutral-800 text-neutral-400 hover:text-white border border-neutral-800 text-xs font-medium transition-colors shrink-0"
-        title="Add manual study session"
+        className="flex items-center gap-1.5 p-2 sm:px-3 sm:py-1.5 rounded-xl bg-neutral-900/60 hover:bg-neutral-800 text-neutral-400 hover:text-white border border-neutral-800 text-xs font-medium transition-colors shrink-0"
+        title="Log Offline Study"
       >
-        <PlusCircle className="w-3.5 h-3.5" />
+        <PlusCircle className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
         <span className="hidden sm:inline">Log Offline Study</span>
-        <span className="sm:hidden">Log</span>
       </button>
 
       {isOpen && (

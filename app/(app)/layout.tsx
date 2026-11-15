@@ -163,19 +163,19 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   }, [isRunning, start, pause, reset]);
 
   return (
-    <div className="min-h-screen flex flex-col relative text-white">
+    <div className="min-h-screen flex flex-col relative text-white w-full max-w-full overflow-x-hidden">
       {/* Dynamic Wallpaper & Overlay */}
       <WallpaperBackground />
 
       {/* Main Layout Grid */}
-      <div className="flex-1 flex">
+      <div className="flex-1 flex w-full max-w-full min-w-0 overflow-x-hidden">
         {!isFullscreen && (
           <AppSidebar mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
         )}
 
         {/* Content wrapper (margins adapt dynamically to sidebar collapsed state) */}
         <div
-          className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ${
+          className={`flex-1 flex flex-col min-w-0 w-full max-w-full overflow-x-hidden transition-all duration-300 ${
             isFullscreen ? "pl-0" : sidebarCollapsed ? "lg:pl-20" : "lg:pl-64"
           }`}
         >
@@ -188,8 +188,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           <main
             className={
               isFullscreen
-                ? "flex-1 w-full h-full p-0 flex flex-col"
-                : "flex-1 p-3 sm:p-4 md:p-6 lg:p-8 max-w-7xl w-full mx-auto"
+                ? "flex-1 w-full h-full p-0 flex flex-col min-w-0"
+                : "flex-1 p-2 sm:p-4 md:p-6 lg:p-8 max-w-7xl w-full mx-auto flex flex-col min-h-0 min-w-0 overflow-x-hidden"
             }
           >
             {children}
