@@ -66,6 +66,7 @@ function AppSidebar({ mobileOpen, setMobileOpen }: SidebarProps) {
 
   const navItems = [
     { label: "Timer", href: "/", icon: Timer, highlight: isRunning },
+    { label: "AI Coach", href: "/ai", icon: Sparkles, badge: "AI" },
     { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
     { label: "Study Planner", href: "/planner", icon: Calendar },
     { label: "Analytics", href: "/analytics", icon: BarChart3 },
@@ -155,7 +156,16 @@ function AppSidebar({ mobileOpen, setMobileOpen }: SidebarProps) {
                       isActive ? "text-black" : "text-neutral-400 group-hover:text-white"
                     }`}
                   />
-                  {(!collapsed || mobileOpen) && <span>{item.label}</span>}
+                  {(!collapsed || mobileOpen) && (
+                    <div className="flex items-center justify-between flex-1">
+                      <span>{item.label}</span>
+                      {item.badge && (
+                        <span className="text-[9px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded-full bg-violet-500/20 text-violet-400 border border-violet-500/30">
+                          {item.badge}
+                        </span>
+                      )}
+                    </div>
+                  )}
 
                   {/* Active timer pulse indicator */}
                   {item.highlight && (

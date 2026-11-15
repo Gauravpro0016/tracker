@@ -18,6 +18,7 @@ import { requestNotificationPermission } from "@/lib/sound";
 import { saveStudySession } from "@/lib/save-session";
 import Link from "next/link";
 import { Sparkles } from "lucide-react";
+import { gsapFadeIn, gsapMagnetic, gsapResetMagnetic } from "@/lib/gsap-animations";
 
 export default function TimerPage() {
   const { data: session } = useSession();
@@ -37,6 +38,13 @@ export default function TimerPage() {
   } = useTimerStore();
 
   const [tickCounter, setTickCounter] = useState(0);
+  const timerContainerRef = React.useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (timerContainerRef.current) {
+      gsapFadeIn(timerContainerRef.current, { y: 15, duration: 0.5 });
+    }
+  }, []);
 
   // Request browser notification permission on first user interaction
   useEffect(() => {
@@ -118,7 +126,7 @@ export default function TimerPage() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-between min-h-[calc(100vh-8rem)] py-2">
+    <div ref={timerContainerRef} className="flex flex-col items-center justify-between min-h-[calc(100vh-8rem)] py-2">
       {/* Top bar: Mode tabs + settings */}
       <div className="w-full flex items-center justify-between max-w-xl mx-auto px-2">
         <ManualSessionModal subjects={serverSubjects} />
@@ -160,6 +168,19 @@ export default function TimerPage() {
           <span>to sync study history and streaks!</span>
         </div>
       )}
+      {/* Quick AI Study Coach Floating Button */}
+      <Link
+        href="/ai"
+        onMouseMove={(e) => gsapMagnetic(e, 0.25)}
+        onMouseLeave={gsapResetMagnetic}
+        className="fixed bottom-24 sm:bottom-8 right-6 z-30 flex items-center gap-2 px-4 py-2.5 rounded-full bg-neutral-900/95 hover:bg-neutral-850 text-white border border-neutral-700/80 shadow-2xl backdrop-blur-md text-xs font-medium hover:border-violet-500/50 hover:text-violet-200 transition-all group"
+        title="Open AI Study Coach & Problem Solver"
+      >
+        <span className="p-1 rounded-full bg-violet-600/20 text-violet-400 border border-violet-500/30 group-hover:rotate-12 transition-transform">
+          <Sparkles className="w-3.5 h-3.5" />
+        </span>
+        <span className="font-semibold">AI Coach</span>
+      </Link>
     </div>
   );
 }

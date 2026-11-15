@@ -26,10 +26,16 @@ export default function TimerDisplay({ seconds }: TimerDisplayProps) {
   const showHours = h > 0;
   const showSeconds = theme.showSeconds;
 
-  // Fluid responsive font size that adapts seamlessly to phones, tabs, laptops, and large screens
-  const dynamicFontSize = showHours
-    ? `clamp(2.2rem, 11.5vw, ${theme.timerFontSize || "6rem"})`
-    : `clamp(3.2rem, 17vw, ${theme.timerFontSize || "7.5rem"})`;
+  // Fluid responsive font size that respects the user's custom timer text size
+  const rawSize = theme.timerFontSize || "7.5rem";
+  const baseSize = parseFloat(rawSize) || 7.5;
+  const unit = rawSize.includes("px") ? "px" : "rem";
+  const minFactor = showHours ? 0.38 : 0.45;
+  const maxFactor = showHours ? 0.85 : 1;
+  const minSize = `${Math.max(1.6, baseSize * minFactor).toFixed(1)}${unit}`;
+  const maxSize = `${(baseSize * maxFactor).toFixed(1)}${unit}`;
+  const vwScale = showHours ? "12vw" : "18vw";
+  const dynamicFontSize = `clamp(${minSize}, ${vwScale}, ${maxSize})`;
 
   return (
     <div className="flex flex-col items-center justify-center select-none py-4 sm:py-6 w-full max-w-full overflow-hidden" suppressHydrationWarning>

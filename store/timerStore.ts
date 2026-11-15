@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { playSound, sendBrowserNotification } from "@/lib/sound";
+import { playSound, sendBrowserNotification, SoundType } from "@/lib/sound";
 import confetti from "canvas-confetti";
 
 export type TimerMode = "stopwatch" | "countdown" | "pomodoro";
@@ -17,8 +17,10 @@ export interface PomodoroConfig {
 
 export interface SoundConfig {
   enabled: boolean;
-  soundType: "bell" | "digital" | "chime" | "marimba";
+  soundType: SoundType;
   volume: number;
+  customSoundUrl?: string;
+  customSoundName?: string;
 }
 
 interface TimerState {
@@ -324,7 +326,7 @@ export const useTimerStore = create<TimerState>()(
           const { soundConfig, mode, pomodoroPhase, cycleCount, pomodoroConfig, currentSubjectId, currentTask, sessionStartedAt, accumulatedSeconds } = state;
 
           if (soundConfig.enabled) {
-            playSound(soundConfig.soundType, soundConfig.volume);
+            playSound(soundConfig.soundType, soundConfig.volume, soundConfig.customSoundUrl);
           }
 
           try {

@@ -208,10 +208,10 @@ export default function AppearancePage() {
           </div>
 
           <div
-            className="font-mono font-bold tracking-tight my-2 text-center"
+            className="font-mono font-bold tracking-tight my-2 text-center transition-all"
             style={{
               color: theme.textColor,
-              fontSize: "clamp(2.5rem, 8vw, 4.5rem)",
+              fontSize: `clamp(2rem, 6vw, ${Math.min(5.5, (parseFloat(theme.timerFontSize || "7.5") * 0.55)).toFixed(2)}rem)`,
               lineHeight: 1,
             }}
           >
@@ -388,8 +388,8 @@ export default function AppearancePage() {
           </div>
         </div>
 
-        {/* Sliders: Radius & Font */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 border-t border-neutral-800">
+        {/* Sliders: Radius, Font, Timer Text Size & Digit Style */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 pt-4 border-t border-neutral-800">
           <div>
             <div className="flex items-center justify-between text-xs text-neutral-400 mb-2">
               <span>Border Radius</span>
@@ -401,6 +401,22 @@ export default function AppearancePage() {
               max="24"
               value={theme.borderRadius}
               onChange={(e) => handleThemeChange({ borderRadius: parseInt(e.target.value) })}
+              className="w-full h-1.5 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-white"
+            />
+          </div>
+
+          <div>
+            <div className="flex items-center justify-between text-xs text-neutral-400 mb-2">
+              <span>Timer Text Size</span>
+              <span className="font-mono text-violet-300 font-semibold">{parseFloat(theme.timerFontSize || "7.5").toFixed(1)} rem</span>
+            </div>
+            <input
+              type="range"
+              min="3.5"
+              max="14.0"
+              step="0.25"
+              value={parseFloat(theme.timerFontSize || "7.5")}
+              onChange={(e) => handleThemeChange({ timerFontSize: `${e.target.value}rem` })}
               className="w-full h-1.5 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-white"
             />
           </div>

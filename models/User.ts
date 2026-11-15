@@ -43,8 +43,10 @@ export interface IUser extends Document {
     };
     sound: {
       enabled: boolean;
-      soundType: "bell" | "digital" | "chime" | "marimba";
+      soundType: string;
       volume: number;
+      customSoundUrl?: string;
+      customSoundName?: string;
     };
     dailyMinimumMinutes: number;
   };
@@ -106,6 +108,8 @@ const UserSchema = new Schema<IUser>(
         enabled: { type: Boolean, default: true },
         soundType: { type: String, default: "bell" },
         volume: { type: Number, default: 0.7 },
+        customSoundUrl: { type: String, default: "" },
+        customSoundName: { type: String, default: "" },
       },
       dailyMinimumMinutes: { type: Number, default: 15 },
     },
